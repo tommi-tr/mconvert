@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>mConvert · Notazioni e prefissi SI</title>
+  <meta name="description" content="Converti le unità di misura del Sistema Internazionale: notazione decimale, tabella dei prefissi (da tera a pico) e notazione scientifica, collegate tra loro. Con esercizi interattivi.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231971c2'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='700' font-size='30' text-anchor='middle' fill='white'%3E10%3C/text%3E%3Ctext x='50' y='24' font-family='Arial' font-weight='700' font-size='16' text-anchor='middle' fill='%23ffd43b'%3En%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">10<sup>n</sup></span>
+      <span class="brand-name">mConvert</span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" role="tab" data-view="convert" aria-selected="true">Conversioni</button>
+      <button class="tab" role="tab" data-view="practice" aria-selected="false">Esercitati</button>
+    </nav>
+    <div class="tools">
+      <button class="icon-btn" id="fontDown" title="Testo più piccolo" aria-label="Testo più piccolo">A−</button>
+      <button class="icon-btn" id="fontUp" title="Testo più grande" aria-label="Testo più grande">A+</button>
+      <button class="icon-btn" id="fullscreen" title="Schermo intero (LIM)" aria-label="Schermo intero">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== CONVERSIONI ===================== -->
+  <main id="view-convert" class="view">
+    <section class="controls">
+      <label class="field">
+        <span class="field-label">Unità di misura</span>
+        <select id="unitSelect"></select>
+      </label>
+      <div class="example">
+        <button class="btn primary" id="newExample">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Nuovo esempio
+        </button>
+        <p class="example-caption" id="exampleCaption"></p>
+      </div>
+      <div class="legend" aria-label="Legenda colori">
+        <span><i class="sw sw-sig"></i>cifre significative</span>
+        <span><i class="sw sw-zero"></i>zeri segnaposto</span>
+        <span><i class="sw sw-comma"></i>virgola</span>
+        <span><i class="sw sw-pow"></i>potenze di 10</span>
+      </div>
+    </section>
+
+    <!-- 1. decimale -->
+    <section class="card notation" id="decCard">
+      <h2 class="n-title"><span class="n-num">1</span>Notazione decimale</h2>
+      <div class="dec-row">
+        <button class="btn round" id="decMul" title="Moltiplica per 10 (la virgola va a destra)">×10</button>
+        <div class="dec-box">
+          <div class="dec-display" id="decDisplay" tabindex="0" role="button" aria-label="Numero in notazione decimale: clicca per modificarlo"></div>
+          <input class="dec-input" id="decInput" inputmode="decimal" autocomplete="off" spellcheck="false" hidden>
+          <select class="prefix-select" id="decPrefix" aria-label="Prefisso"></select>
+        </div>
+        <button class="btn round" id="decDiv" title="Dividi per 10 (la virgola va a sinistra)">÷10</button>
+      </div>
+      <p class="hint" id="decHint">Tocca il numero per scriverne uno tuo. Puoi usare la virgola.</p>
+    </section>
+
+    <!-- 2. tabella prefissi -->
+    <section class="card notation" id="tableCard">
+      <h2 class="n-title"><span class="n-num">2</span>Tabella dei prefissi
+        <span class="n-sub">passa sopra o tocca un prefisso · trascina le cifre</span></h2>
+      <div id="convTable"></div>
+      <div class="readout" id="readout" aria-live="polite"></div>
+      <div class="suggest-row">
+        <button class="chip" id="bestPrefix"></button>
+        <span class="dim-note" id="dimNote"></span>
+      </div>
+    </section>
+
+    <!-- 3. scientifica -->
+    <section class="card notation" id="sciCard">
+      <h2 class="n-title"><span class="n-num">3</span>Notazione scientifica</h2>
+      <div class="sci-wrap">
+        <div class="sci-row">
+          <div class="sci-mant">
+            <div class="sci-mant-display" id="sciMant" tabindex="0" role="button" aria-label="Coefficiente: clicca per modificarlo"></div>
+            <input class="sci-input" id="sciMantInput" inputmode="decimal" autocomplete="off" spellcheck="false" hidden>
+          </div>
+          <span class="times">×</span>
+          <span class="ten">10</span>
+          <div class="exp-ctl">
+            <div class="exp-val" id="sciExp" tabindex="0" role="button" aria-label="Esponente: clicca per modificarlo"></div>
+            <input class="exp-input" id="sciExpInput" inputmode="numeric" autocomplete="off" hidden>
+            <div class="exp-btns">
+              <button class="exp-btn" id="expUp" aria-label="Aumenta l'esponente">▲</button>
+              <button class="exp-btn" id="expDown" aria-label="Diminuisci l'esponente">▼</button>
+            </div>
+          </div>
+          <span class="unit sci-unit" id="sciUnit"></span>
+        </div>
+        <div class="odg">
+          <div class="odg-label">Ordine di grandezza</div>
+          <div class="odg-val" id="odgVal"></div>
+          <label class="odg-rule">regola:
+            <select id="odgRule">
+              <option value="5">coefficiente &lt; 5</option>
+              <option value="sqrt10">coefficiente &lt; √10 ≈ 3,16</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <p class="hint" id="sciHint"></p>
+      <p class="si-line" id="siLine"></p>
+    </section>
+  </main>
+
+  <!-- ===================== ESERCITATI ===================== -->
+  <main id="view-practice" class="view" hidden>
+    <section class="controls">
+      <label class="field">
+        <span class="field-label">Livello</span>
+        <select id="levelSelect">
+          <option value="base">Base · k h da – d c m</option>
+          <option value="medio">Medio · da tera a pico</option>
+          <option value="avanzato">Avanzato · anche m² e m³</option>
+        </select>
+      </label>
+      <button class="btn primary" id="newExercise">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Nuovo esercizio
+      </button>
+      <div class="score" aria-live="polite">
+        <span class="score-item"><b id="scorePts">0</b> punti</span>
+        <span class="score-item"><b id="scoreStreak">0</b> di fila</span>
+        <span class="score-item"><b id="scoreDone">0</b> esercizi</span>
+      </div>
+    </section>
+    <section class="card given" id="givenCard"></section>
+    <div id="steps"></div>
+  </main>
+
+  <footer class="foot">
+    Prefissi SI da tera (10<sup>12</sup>) a pico (10<sup>−12</sup>). Per la massa l'unità SI è il kilogrammo: i prefissi si applicano al grammo.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
