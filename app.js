@@ -180,7 +180,7 @@ function sciHTML(v, s, unitH) {
   return `<span class="sig">${mantString(w)}</span> × <span class="pow">${powHTML(sciExp(w))}</span>${unitH ? ' ' + unitH : ''}`;
 }
 // ------------------------------------------------------------------ impostazioni
-const DEFAULTS = { decPrefix: true, sciPrefix: false, odgPrefix: false, fundamental: false, scores: true, odgRule: '5' };
+const DEFAULTS = { roundMode: 'half-up', decPrefix: true, sciPrefix: false, odgPrefix: false, fundamental: false, scores: true, odgRule: '5' };
 const S = Object.assign({}, DEFAULTS, (() => { try { return JSON.parse(localStorage.getItem('mconvert-settings') || '{}'); } catch { return {}; } })());
 const saveSettings = () => { try { localStorage.setItem('mconvert-settings', JSON.stringify(S)); } catch {} };
 function odgOf(v, s) {
@@ -481,7 +481,7 @@ function initConvert() {
 }
 
 /** Display cliccabile che diventa un campo di testo (aggiorna le altre notazioni mentre si scrive). */
-function editable(display, input, getText, apply) {
+function editable(display, input, getText, apply, rerender = renderConvert) {
   let original = null;
   const open = () => {
     original = getText();
@@ -493,7 +493,7 @@ function editable(display, input, getText, apply) {
     if (input.hidden) return;
     if (!commit && original != null) apply(original);
     input.hidden = true; display.hidden = false; input.classList.remove('invalid');
-    renderConvert();
+    rerender();
   };
   display.addEventListener('click', open);
   display.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
@@ -624,6 +624,251 @@ function randomExample(u) {
   return ['Numero a caso', decString(v, 0), k, u.id];
 }
 
+// ------------------------------------------------------------------ CIFRE SIGNIFICATIVE
+const ROUND_MODES = {
+  'half-up':   { name: 'Arrotondamento', short: 'se la prima cifra eliminata è ≥ 5 per eccesso, altrimenti per difetto' },
+  'up':        { name: 'Per eccesso', short: 'l’ultima cifra tenuta aumenta di 1' },
+  'down':      { name: 'Per difetto (troncamento)', short: 'si tolgono le cifre in più' },
+  'half-even': { name: 'Al pari (esattamente a metà → cifra pari)', short: 'come l’arrotondamento, ma esattamente a metà si sceglie la cifra pari' },
+};
+
+/** Arrotonda v a N cifre significative. Il risultato ha sempre d di lunghezza N (anche con zeri finali significativi). */
+function roundSig(v, N, mode) {
+  if (isZero(v)) return { d: '0', e: 0, exact: true, low: v, high: v };
+  const L = v.d.length;
+  if (L <= N) { const r = { d: v.d + '0'.repeat(N - L), e: v.e - (N - L) }; return { ...r, exact: true, low: r, high: r, up: false }; }
+  const keep = v.d.slice(0, N), rest = v.d.slice(N), e = v.e + (L - N);
+  const first = +rest[0], tailNZ = /[1-9]/.test(rest.slice(1));
+  let up;
+  if (mode === 'up') up = true;
+  else if (mode === 'down') up = false;
+  else if (mode === 'half-even') up = first > 5 || (first === 5 && (tailNZ || (+keep[N - 1]) % 2 === 1));
+  else up = first >= 5;
+  const low = { d: keep, e };
+  let hk = (BigInt(keep) + 1n).toString(), he = e;
+  if (hk.length > N) { hk = hk.slice(0, N); he++; }
+  const high = { d: hk, e: he };
+  return { ...(up ? high : low), up, low, high, first, tailNZ, exact: false, keep };
+}
+function explainRound(r, mode, N) {
+  if (r.exact) return `Il numero ha già al massimo ${N} ${plural(N, 'cifra significativa', 'cifre significative')}: si scrivono zeri significativi finché le cifre sono ${N}.`;
+  const dir = r.up ? '<b>per eccesso</b>' : '<b>per difetto</b>';
+  const f = `<b class="decide">${r.first}</b>`;
+  if (mode === 'up') return `Per eccesso: le cifre eliminate non sono tutte zero, quindi l’ultima cifra tenuta aumenta di 1.`;
+  if (mode === 'down') return `Per difetto: si eliminano semplicemente le cifre dopo la ${N}ª.`;
+  if (mode === 'half-even' && r.first === 5 && !r.tailNZ)
+    return `La prima cifra eliminata è ${f} e dopo ci sono solo zeri: il numero è esattamente a metà. Si sceglie la cifra pari, quindi si arrotonda ${dir}.`;
+  return `La prima cifra eliminata è ${f}, che è ${r.first >= 5 ? '≥ 5' : '< 5'}: si arrotonda ${dir}.`;
+}
+/** Notazione decimale con cifre tenute / decisiva / eliminate evidenziate. */
+function decHTMLMarked(v, s, N) {
+  const { int, frac } = decTokens(v, s);
+  let si = 0, i = 0;
+  const cls = t => {
+    if (t[1] !== 'sig') return si > N ? 'zero drop' : 'zero';
+    const c = si < N ? 'sig keep' : si === N ? 'sig drop decide' : 'sig drop';
+    si++; return c;
+  };
+  let h = '';
+  int.forEach((t, j) => { if (int.length > 4 && j > 0 && (int.length - j) % 3 === 0) h += '<span class="gap"></span>'; h += `<span class="${cls(t)}" style="--i:${i++}">${t[0]}</span>`; });
+  if (frac.length) {
+    h += '<span class="comma">,</span>';
+    frac.forEach((t, j) => { if (frac.length > 4 && j > 0 && j % 3 === 0) h += '<span class="gap"></span>'; h += `<span class="${cls(t)}" style="--i:${i++}">${t[0]}</span>`; });
+  }
+  return h;
+}
+const sfModeOpts = () => Object.entries(ROUND_MODES).map(([k, m]) => `<option value="${k}">${m.name}</option>`).join('');
+
+const sf = { unit: UNIT.get('m'), v: { d: '45728', e: -7 }, k: -3, N: 3, mode: S.roundMode || 'half-up' };
+let sfTable;
+function randomSfNumber(u) {
+  const L = 4 + rnd(4);
+  let d = String(1 + rnd(9));
+  for (let i = 1; i < L; i++) d += (i === L - 1 ? 1 + rnd(9) : rnd(10));
+  // ogni tanto un caso interessante: …5 esatto, oppure tanti 9
+  if (Math.random() < 0.15) d = d.slice(0, 2 + rnd(2)) + '5';
+  else if (Math.random() < 0.12) d = String(1 + rnd(9)) + '99' + (1 + rnd(9));
+  const k = pick(usualKs(u, PREFIXES.map(p => p.k).filter(k => Math.abs(k) <= (u.dim === 1 ? 9 : 3))));
+  return { v: norm(d, rnd(6) - 2 - (d.length - 1) + k * u.dim), k };
+}
+function sfNew(sameUnit) {
+  const u = sameUnit ? sf.unit : pick(allowedUnits());
+  const { v, k } = randomSfNumber(u);
+  sf.unit = u; sf.v = v; sf.k = k;
+  renderSf(true); flash('sfDisplay');
+}
+function initSigfig() {
+  fillUnitSelect($('sfUnit'));
+  $('sfUnit').addEventListener('change', () => {
+    const nu = UNIT.get($('sfUnit').value);
+    const numeral = shiftV(sf.v, -sf.k * sf.unit.dim);
+    sf.unit = nu; sf.v = shiftV(numeral, sf.k * nu.dim); renderSf(true);
+  });
+  $('sfMode').innerHTML = sfModeOpts();
+  $('sfMode').value = sf.mode;
+  $('sfMode').addEventListener('change', e => { sf.mode = e.target.value; renderSf(); });
+  $('sfPrefix').addEventListener('change', e => { sf.k = +e.target.value; renderSf(); });
+  $('sfMinus').addEventListener('click', () => { sf.N = Math.max(1, sf.N - 1); renderSf(); });
+  $('sfPlus').addEventListener('click', () => { sf.N = Math.min(9, sf.N + 1); renderSf(); });
+  $('sfNewSame').addEventListener('click', () => sfNew(true));
+  $('sfNewOther').addEventListener('click', () => sfNew(false));
+  sfTable = new PrefixTable($('sfTable'), { pickable: true, draggable: false,
+    onPreview: () => {}, onPick: k => { sf.k = k; renderSf(); } });
+  editable($('sfDisplay'), $('sfInput'),
+    () => decString(sf.v, sf.k * sf.unit.dim),
+    str => { const p = parseNum(str); if (!p || isZero(p)) return false; sf.v = shiftV(p, sf.k * sf.unit.dim); renderSf(false, true); return true; },
+    () => renderSf());
+  sfNew(false);
+}
+function renderSf(unitChanged = false, editing = false) {
+  const u = sf.unit, d = u.dim, s = sf.k * d, N = sf.N;
+  $('sfUnit').value = u.id;
+  const ps = $('sfPrefix');
+  if (unitChanged || ps.dataset.unit !== u.id) { ps.innerHTML = PREFIXES.map(p => `<option value="${p.k}">${unitText(p.k, u)}</option>`).join(''); ps.dataset.unit = u.id; }
+  ps.value = sf.k;
+  if (!editing) $('sfDisplay').innerHTML = decHTMLMarked(sf.v, s, N);
+  $('sfN').textContent = N;
+  $('sfDigits').textContent = `(il numero ne ha ${sf.v.d.length})`;
+  const r = roundSig(sf.v, N, sf.mode);
+  const uh = unitHTML(sf.k, u);
+  // le due possibilità
+  if (r.exact) $('sfBracket').innerHTML = `<div class="brk-why">${explainRound(r, sf.mode, N)}</div>`;
+  else $('sfBracket').innerHTML = `
+    <div class="brk">
+      <div class="brk-opt${r.up ? '' : ' chosen'}"><span class="brk-l">per difetto</span><span class="num">${decHTML(r.low, s)}</span>&nbsp;${uh}</div>
+      <div class="brk-mid"><span class="num">${decHTMLMarked(sf.v, s, N)}</span>&nbsp;${uh}</div>
+      <div class="brk-opt${r.up ? ' chosen' : ''}"><span class="brk-l">per eccesso</span><span class="num">${decHTML(r.high, s)}</span>&nbsp;${uh}</div>
+    </div><div class="brk-why">${explainRound(r, sf.mode, N)}</div>`;
+  // risultato nelle tre notazioni
+  const ambiguous = !isZero(r) && r.e > s && /0$/.test(r.d + '0'.repeat(Math.max(0, r.e - s)));
+  $('sfDec').innerHTML = `<span class="num">${decHTML(r, s)}</span>&nbsp;${uh}`;
+  $('sfDecNote').innerHTML = ambiguous ? 'Attenzione: in decimale gli zeri finali non dicono quante sono le cifre significative. Meglio un prefisso o la notazione scientifica.' : '';
+  const b = bestPrefix(r, u);
+  $('sfPfx').innerHTML = `<span class="num">${decHTML(r, b * d)}</span>&nbsp;${unitHTML(b, u)}`;
+  const kb = S.sciPrefix ? sf.k : baseK(u);
+  $('sfSci').innerHTML = sciHTML(r, kb * d, unitHTML(kb, u));
+  sfTable.setUnit(u);
+  sfTable.update({ v: r, k: sf.k, activeK: sf.k, currentK: sf.k });
+  // tabella al variare di N
+  const rows = [];
+  for (let n = 1; n <= Math.max(6, sf.v.d.length); n++) {
+    const rn = roundSig(sf.v, n, sf.mode);
+    rows.push(`<tr class="${n === N ? 'cur' : ''}" data-n="${n}"><td>${n}</td><td class="num">${decHTML(rn, s)}&nbsp;${uh}</td><td>${sciHTML(rn, kb * d, unitHTML(kb, u))}</td></tr>`);
+  }
+  $('sfRows').innerHTML = rows.join('');
+  $('sfRows').querySelectorAll('tr').forEach(tr => tr.onclick = () => { sf.N = +tr.dataset.n; renderSf(); });
+}
+
+// esercizi sulle cifre significative
+function genSf(level) {
+  const L = LEVELS[level];
+  let units = L.units.filter(id => unitAllowed(UNIT.get(id)));
+  if (!units.length) units = ['m'];
+  for (let t = 0; t < 400; t++) {
+    const u = UNIT.get(pick(units));
+    const { v } = randomSfNumber(u);
+    const ks = usualKs(u, L.ks);
+    const k = pick(ks);
+    const vv = shiftV(norm(v.d, 0), k * u.dim + (rnd(6) - 3) - (v.d.length - 1) + (level === 'base' ? 2 : 0));
+    const N = 1 + rnd(level === 'base' ? 3 : 4);
+    if (vv.d.length <= N) continue;
+    if (decLength(vv, k * u.dim) > L.maxLen) continue;
+    const r = roundSig(vv, N, S.roundMode);
+    if (r.e > k * u.dim) continue; // eviterebbe zeri finali ambigui nella risposta decimale
+    return { kind: 'sf', u, v: vv, kA: k, N, mode: S.roundMode, r, level };
+  }
+  const u = UNIT.get('m'); const v = { d: '4572', e: -3 };
+  return { kind: 'sf', u, v, kA: 0, N: 2, mode: S.roundMode, r: roundSig(v, 2, S.roundMode), level };
+}
+function renderGivenSf() {
+  const { u, v, kA, N, mode } = ex;
+  const who = duel ? `<b>${escapeHTML(duel.names[duel.cur])}</b>: a` : 'A';
+  $('givenCard').innerHTML = `<div class="given-head"><span class="badge">Consegna</span> ${who}pprossima questa misura di <b>${u.q}</b> a <b>${N} ${plural(N, 'cifra significativa', 'cifre significative')}</b>. Metodo: <b>${ROUND_MODES[mode].name.toLowerCase()}</b> <span class="muted">(${ROUND_MODES[mode].short})</span>.</div>
+    <div class="given-val"><span class="num">${decHTML(v, kA * u.dim)}</span>&nbsp;${unitHTML(kA, u)}</div>`;
+  ex.givenTable = null;
+}
+function mountSfStep(st) {
+  const { u, v, kA, N, r, mode } = ex, d = u.dim, s = kA * d, uh = unitHTML(kA, u);
+  const c = st.card;
+  if (st.type === 'cut') {
+    c.innerHTML = stepHead(st, `Tocca l’ultima cifra da tenere (la ${N}ª cifra significativa)`) +
+      `<div class="step-body"><p class="instr">Ricorda: gli zeri iniziali non sono cifre significative.</p>
+       <div class="cut-row num"></div></div>` + stepFoot();
+    const { int, frac } = decTokens(v, s);
+    const toks = int.map(t => ({ t })).concat(frac.length ? [{ comma: true }] : [], frac.map(t => ({ t })));
+    let si = 0;
+    c.querySelector('.cut-row').innerHTML = toks.map((x, i) => x.comma ? '<span class="comma">,</span>' :
+      `<button class="cut-d ${x.t[1]}" data-i="${i}" data-si="${x.t[1] === 'sig' ? si++ : -1}" data-lead="${x.t[1] === 'zero' && si === 0 ? 1 : 0}">${x.t[0]}</button>`).join('') + `&nbsp;${uh}`;
+    st.choice = null;
+    c.querySelectorAll('.cut-d').forEach(b => b.onclick = () => {
+      if (st.solved) return;
+      st.choice = b; st.update();
+    });
+    st.update = () => {
+      const ci = st.choice ? +st.choice.dataset.i : -1;
+      c.querySelectorAll('.cut-d').forEach(b => { const i = +b.dataset.i; b.classList.toggle('kept', ci >= 0 && i <= ci && b.dataset.lead !== '1'); b.classList.toggle('picked', i === ci); b.classList.toggle('cut', ci >= 0 && i > ci); });
+      clearFb(st);
+    };
+    st.check = () => st.choice && +st.choice.dataset.si === N - 1;
+    st.why = () => {
+      if (!st.choice) return 'Tocca una cifra.';
+      if (st.choice.dataset.lead === '1') return 'Gli zeri iniziali non sono cifre significative: si comincia a contare dalla prima cifra diversa da zero.';
+      const si2 = +st.choice.dataset.si;
+      if (si2 < 0) return 'Quello zero serve solo a indicare la posizione della virgola.';
+      return `Così tieni ${si2 + 1} ${plural(si2 + 1, 'cifra significativa', 'cifre significative')}, ma ne servono ${N}.`;
+    };
+    st.solve = () => { st.choice = c.querySelector(`.cut-d[data-si="${N - 1}"]`); };
+  }
+  if (st.type === 'round') {
+    const kb = S.sciPrefix ? kA : baseK(u);
+    const opts = new Map();
+    const add = (val, ok) => { const h = sciHTML(val, kb * d, unitHTML(kb, u)); if (!opts.has(h)) opts.set(h, ok); };
+    add(r, true);
+    if (!r.exact) add(r.up ? r.low : r.high, false);
+    add(roundSig(v, N + 1, mode), false);
+    if (N > 1) add(roundSig(v, N - 1, mode), false);
+    add(shiftV(r, pick([-1, 1])), false);
+    add(shiftV(r, pick([-2, 2, 3])), false);
+    const list = [...opts.entries()].slice(0, 4).sort(() => Math.random() - 0.5);
+    c.innerHTML = stepHead(st, `Arrotonda: qual è il risultato in notazione scientifica?`) +
+      `<div class="step-body"><p class="instr">${N} ${plural(N, 'cifra significativa', 'cifre significative')}, metodo: ${ROUND_MODES[mode].name.toLowerCase()}.</p>
+       <div class="odg-opts">${list.map(([h, ok], i) => `<button class="btn opt" data-ok="${ok ? 1 : 0}"><span>${h}</span></button>`).join('')}</div></div>` + stepFoot();
+    c.querySelector('.check').hidden = true;
+    st.choice = null;
+    c.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      if (st.solved || ex.cur !== st.i) return;
+      st.choice = b; c.querySelectorAll('.opt').forEach(x => x.classList.toggle('chosen', x === b)); verify(st);
+    });
+    st.update = () => clearFb(st);
+    st.check = () => st.choice?.dataset.ok === '1';
+    st.why = () => `Conta le cifre del coefficiente (devono essere ${N}) e controlla l’arrotondamento: ${explainRound(r, mode, N)}`;
+    st.solve = () => { const b = c.querySelector('.opt[data-ok="1"]'); st.choice = b; c.querySelectorAll('.opt').forEach(x => x.classList.toggle('chosen', x === b)); };
+  }
+  if (st.type === 'sfdec') {
+    const want = decString(r, s);
+    c.innerHTML = stepHead(st, `Scrivi il risultato in notazione decimale in ${uh}`) +
+      `<div class="step-body"><p class="instr">Attenzione agli zeri: se sono cifre significative vanno scritti.</p>
+       <label class="type-row big-in"><input class="type-in" inputmode="decimal" autocomplete="off" spellcheck="false">&nbsp;${uh}</label></div>` + stepFoot();
+    const inp = c.querySelector('.type-in');
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') c.querySelector('.check').click(); });
+    inp.addEventListener('input', () => clearFb(st));
+    const clean = x => x.trim().replace(/[\s  ']/g, '').replace('.', ',');
+    st.update = () => clearFb(st);
+    st.check = () => clean(inp.value) === want;
+    st.why = () => {
+      const p = parseNum(inp.value);
+      if (!p) return 'Scrivi un numero.';
+      if (eqV(p, norm(r.d, r.e))) return `Il valore è giusto, ma servono <b>${N}</b> cifre significative: scrivi anche gli zeri significativi finali.`;
+      return `Non è il valore arrotondato. ${explainRound(r, mode, N)}`;
+    };
+    st.solve = () => { inp.value = want; };
+  }
+}
+function sfSummary() {
+  const { u, v, kA, N, r } = ex, s = kA * u.dim, kb = S.sciPrefix ? kA : baseK(u);
+  return `${decText(v, s)}&nbsp;${unitHTML(kA, u)} ≈ ${decText(r, s)}&nbsp;${unitHTML(kA, u)} = ${sciHTML(r, kb * u.dim, unitHTML(kb, u))} <span class="muted">(${N} c.s.)</span>`;
+}
+
 // ------------------------------------------------------------------ vista ESERCITATI
 const LEVELS = {
   base:     { ks: [3, 2, 1, 0, -1, -2, -3], units: ['m', 'g', 'kg', 's', 'A', 'V', 'W', 'J', 'N', 'Pa', 'Hz'], dims: false, maxLen: 9 },
@@ -639,6 +884,9 @@ function initPractice() {
   const ls = $('levelSelect');
   ls.value = localStorage.getItem('level') || 'base';
   ls.addEventListener('change', () => { localStorage.setItem('level', ls.value); if (mode === 'train') newExercise(); });
+  const ts = $('typeSelect');
+  ts.value = localStorage.getItem('exType') || 'conv';
+  ts.addEventListener('change', () => { localStorage.setItem('exType', ts.value); if (mode === 'train') newExercise(); });
   $('newExercise').addEventListener('click', newExercise);
   document.querySelectorAll('.seg-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
   $('duelStart').addEventListener('click', startDuel);
@@ -715,12 +963,20 @@ function genExercise(level) {
 }
 
 function newExercise() {
-  ex = genExercise($('levelSelect').value);
+  const t = $('typeSelect').value;
+  const kind = t === 'mix' ? pick(['conv', 'sf']) : t;
   const steps = [];
-  if (ex.given !== 'tab') steps.push({ type: 'tab' });
-  if (!(ex.given === 'dec' && ex.kDec === ex.kA)) steps.push({ type: 'dec' });
-  if (!(ex.given === 'sci' && ex.kSci === ex.kA)) steps.push({ type: 'sci' });
-  steps.push({ type: 'odg' });
+  if (kind === 'sf') {
+    ex = genSf($('levelSelect').value);
+    steps.push({ type: 'cut' }, { type: 'round' }, { type: 'sfdec' });
+  } else {
+    ex = genExercise($('levelSelect').value);
+    ex.kind = 'conv';
+    if (ex.given !== 'tab') steps.push({ type: 'tab' });
+    if (!(ex.given === 'dec' && ex.kDec === ex.kA)) steps.push({ type: 'dec' });
+    if (!(ex.given === 'sci' && ex.kSci === ex.kA)) steps.push({ type: 'sci' });
+    steps.push({ type: 'odg' });
+  }
   ex.steps = steps; ex.cur = 0; ex.pts = 0; ex.t0 = performance.now();
   renderGiven();
   const host = $('steps'); host.innerHTML = '';
@@ -730,6 +986,7 @@ function newExercise() {
 }
 
 function renderGiven() {
+  if (ex.kind === 'sf') return renderGivenSf();
   const { u, v, kA, given } = ex, d = u.dim;
   const g = $('givenCard');
   const uh = unitHTML(kA, u);
@@ -752,6 +1009,7 @@ const stepHead = (st, title) => `<div class="step-head"><span class="step-n">${s
 const stepFoot = () => `<div class="step-foot"><button class="btn primary check">Verifica</button><button class="btn ghost solve">Mostra soluzione</button><div class="feedback" aria-live="polite"></div></div>`;
 
 function mountStep(st) {
+  if (ex.kind === 'sf') { mountSfStep(st); wireStep(st); return; }
   const { u, v, kA, kDec, kSci, kOdg } = ex, d = u.dim;
   const c = st.card;
   if (st.type === 'tab') {
@@ -862,6 +1120,10 @@ function mountStep(st) {
     st.why = () => `Il numero è ${sciHTML(v, kOdg * d, unitHTML(kOdg, u))}: confronta il coefficiente con ${S.odgRule === '5' ? '5' : '√10'}.`;
     st.solve = () => { st.choice = st.correct; c.querySelectorAll('.opt').forEach(x => x.classList.toggle('chosen', +x.dataset.o === st.correct)); };
   }
+  wireStep(st);
+}
+function wireStep(st) {
+  const c = st.card;
   c.querySelector('.check').addEventListener('click', () => verify(st));
   c.querySelector('.solve').addEventListener('click', () => {
     if (st.solved || ex.cur !== st.i) return;
@@ -917,6 +1179,7 @@ function finish(st) {
   exerciseDone();
 }
 function summaryHTML() {
+  if (ex.kind === 'sf') return sfSummary();
   const { u, v, kA, kDec, kSci } = ex, d = u.dim;
   const parts = [`${decText(v, kA * d)}&nbsp;${unitHTML(kA, u)}`];
   if (kDec !== kA) parts.push(`${decText(v, kDec * d)}&nbsp;${unitHTML(kDec, u)}`);
@@ -945,7 +1208,12 @@ function exerciseDone() {
       `<div class="done-msg"><b>Esercizio completato!</b> ${summaryHTML()}</div>
        <div class="done-btns"><button class="btn primary next">Prossimo esercizio</button><button class="btn ghost explore">Esplora in Conversioni</button></div>`);
     end.querySelector('.next').onclick = () => { newExercise(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    if (ex.kind === 'sf') end.querySelector('.explore').textContent = 'Esplora in Cifre significative';
     end.querySelector('.explore').onclick = () => {
+      if (ex.kind === 'sf') {
+        sf.unit = unitAllowed(ex.u) ? ex.u : sf.unit; sf.v = ex.v; sf.k = ex.kA; sf.N = ex.N; sf.mode = ex.mode; $('sfMode').value = sf.mode;
+        showView('sigfig'); renderSf(true); return;
+      }
       if (unitAllowed(ex.u)) { cv.unit = ex.u; cv.v = ex.v; cv.k = ex.kA; cv.previewK = null; }
       $('exampleCaption').innerHTML = `Dall’esercizio: <b>${decText(ex.v, ex.kA * ex.u.dim)}&nbsp;${unitHTML(ex.kA, ex.u)}</b>`;
       showView('convert'); renderConvert(true);
@@ -988,6 +1256,7 @@ function initSettings() {
   const sync = () => {
     for (const [id, key] of Object.entries(boxes)) $(id).checked = !!S[key];
     dlg.querySelectorAll('input[name="odgRule"]').forEach(r => { r.checked = r.value === S.odgRule; });
+    $('setRoundMode').value = S.roundMode;
   };
   $('openSettings').addEventListener('click', () => {
     sync(); snapshot = JSON.stringify({ ...S, scores: 0 });
@@ -995,6 +1264,8 @@ function initSettings() {
   });
   for (const [id, key] of Object.entries(boxes)) $(id).addEventListener('change', e => { S[key] = e.target.checked; saveSettings(); applySettings(); });
   dlg.querySelectorAll('input[name="odgRule"]').forEach(r => r.addEventListener('change', () => { S.odgRule = r.value; saveSettings(); applySettings(); }));
+  $('setRoundMode').innerHTML = sfModeOpts();
+  $('setRoundMode').addEventListener('change', e => { S.roundMode = e.target.value; saveSettings(); });
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); }); // clic fuori: chiude
   dlg.addEventListener('close', () => {
     // in allenamento un cambio di impostazioni rigenera l'esercizio; nella sfida vale dal turno successivo
@@ -1008,6 +1279,9 @@ function applySettings() {
   }
   fillUnitSelect($('unitSelect'));
   renderConvert(true);
+  if (!unitAllowed(sf.unit)) sf.unit = sf.unit.q === 'massa' ? UNIT.get('kg') : UNIT.get('m');
+  fillUnitSelect($('sfUnit'));
+  renderSf(true);
   updateScoreVisibility();
 }
 
@@ -1016,12 +1290,14 @@ function showView(name) {
   document.querySelectorAll('.tab').forEach(t => { const on = t.dataset.view === name; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
   $('view-convert').hidden = name !== 'convert';
   $('view-practice').hidden = name !== 'practice';
+  $('view-sigfig').hidden = name !== 'sigfig';
   if (name === 'practice' && !ex && mode === 'train') newExercise();
   relayoutAll();
-  history.replaceState(null, '', name === 'practice' ? '#esercitati' : '#');
+  history.replaceState(null, '', name === 'practice' ? '#esercitati' : name === 'sigfig' ? '#cifre-significative' : '#');
 }
 function relayoutAll() {
   convTable?.layout();
+  sfTable?.layout();
   ex?.steps.forEach(s => s.table?.layout());
   ex?.givenTable?.layout();
 }
@@ -1036,6 +1312,7 @@ document.addEventListener('DOMContentLoaded', () => {
   applyFont();
   initConvert();
   initPractice();
+  initSigfig();
   initSettings();
   updateScoreVisibility();
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showView(t.dataset.view)));
@@ -1047,4 +1324,5 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(relayoutAll, 80); });
   if (location.hash === '#esercitati') showView('practice');
+  if (location.hash === '#cifre-significative') showView('sigfig');
 });

@@ -19,6 +19,7 @@
     </div>
     <nav class="tabs" role="tablist">
       <button class="tab active" role="tab" data-view="convert" aria-selected="true">Conversioni</button>
+      <button class="tab" role="tab" data-view="sigfig" aria-selected="false">Cifre significative</button>
       <button class="tab" role="tab" data-view="practice" aria-selected="false">Esercitati</button>
     </nav>
     <div class="tools">
@@ -108,6 +109,49 @@
     </section>
   </main>
 
+  <!-- ===================== CIFRE SIGNIFICATIVE ===================== -->
+  <main id="view-sigfig" class="view" hidden>
+    <section class="controls">
+      <select id="sfUnit" aria-label="Unità di misura"></select>
+      <button class="btn" id="sfNewSame">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Nuovo numero con questa unità</button>
+      <button class="btn primary" id="sfNewOther">Nuovo numero con un’altra unità</button>
+    </section>
+    <section class="card">
+      <div class="n-head"><h2 class="n-title">Misura di partenza</h2><span class="n-sub">tocca il numero per scriverne uno tuo</span>
+        <div class="legend"><span><i class="sw sw-sig"></i>cifre tenute</span><span><i class="sw sw-decide"></i>prima cifra eliminata</span><span><i class="sw sw-drop"></i>cifre eliminate</span></div></div>
+      <div class="sf-top">
+        <div class="dec-box">
+          <div class="dec-display" id="sfDisplay" tabindex="0" role="button" aria-label="Misura di partenza: clicca per modificarla"></div>
+          <input class="dec-input" id="sfInput" inputmode="decimal" autocomplete="off" spellcheck="false" hidden>
+          <select class="prefix-select" id="sfPrefix" aria-label="Prefisso"></select>
+        </div>
+        <div class="sf-ctl">
+          <div class="sf-n"><span class="field-label">Cifre significative</span>
+            <div class="stepper"><button class="btn round" id="sfMinus" aria-label="Una cifra in meno">−</button><b id="sfN">3</b><button class="btn round" id="sfPlus" aria-label="Una cifra in più">+</button></div>
+            <small class="muted" id="sfDigits"></small></div>
+          <label class="sf-mode"><span class="field-label">Come approssimare</span><select id="sfMode"></select></label>
+        </div>
+      </div>
+      <div id="sfBracket" class="sf-bracket"></div>
+    </section>
+    <section class="card">
+      <div class="n-head"><h2 class="n-title">Risultato nelle tre notazioni</h2></div>
+      <div class="sf-res">
+        <div><div class="sf-lab">Decimale</div><div class="sf-val" id="sfDec"></div></div>
+        <div><div class="sf-lab">Con il prefisso più comodo</div><div class="sf-val" id="sfPfx"></div></div>
+        <div><div class="sf-lab">Scientifica</div><div class="sf-val" id="sfSci"></div></div>
+      </div>
+      <p class="dim-note" id="sfDecNote"></p>
+      <div id="sfTable"></div>
+    </section>
+    <section class="card">
+      <div class="n-head"><h2 class="n-title">Al variare del numero di cifre significative</h2><span class="n-sub">tocca una riga</span></div>
+      <table class="sf-rows"><thead><tr><th>c.s.</th><th>Decimale</th><th>Scientifica</th></tr></thead><tbody id="sfRows"></tbody></table>
+    </section>
+  </main>
+
   <!-- ===================== ESERCITATI ===================== -->
   <main id="view-practice" class="view" hidden>
     <section class="controls">
@@ -115,6 +159,11 @@
         <button class="seg-btn active" data-mode="train">Allenamento</button>
         <button class="seg-btn" data-mode="duel">Sfida a due</button>
       </div>
+      <select id="typeSelect" aria-label="Tipo di esercizi">
+        <option value="conv">Conversioni</option>
+        <option value="sf">Cifre significative</option>
+        <option value="mix">Misto</option>
+      </select>
       <select id="levelSelect" aria-label="Livello">
         <option value="base">Livello base · k h da – d c m</option>
         <option value="medio">Livello medio · da tera a pico</option>
@@ -165,6 +214,11 @@
         <legend>Ordine di grandezza</legend>
         <label class="check"><input type="radio" name="odgRule" value="5"><span>10<sup>n</sup> se il coefficiente è minore di 5, altrimenti 10<sup>n+1</sup></span></label>
         <label class="check"><input type="radio" name="odgRule" value="sqrt10"><span>10<sup>n</sup> se il coefficiente è minore di √10 ≈ 3,16, altrimenti 10<sup>n+1</sup></span></label>
+      </fieldset>
+      <fieldset>
+        <legend>Cifre significative negli esercizi</legend>
+        <label class="check"><span>Come approssimare</span></label>
+        <select id="setRoundMode" aria-label="Metodo di approssimazione negli esercizi"></select>
       </fieldset>
       <fieldset>
         <legend>Esercitati</legend>
