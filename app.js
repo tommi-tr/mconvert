@@ -14,27 +14,28 @@ const PFX = new Map(PREFIXES.map(p => [p.k, p]));
 const K_MAX = 12, K_MIN = -12;
 
 const UNITS = [
-  { id: 'm',  sym: 'm',  dim: 1, q: 'lunghezza',             g: 'Lunghezza, superficie, volume' },
-  { id: 'm2', sym: 'm',  dim: 2, q: 'superficie',            g: 'Lunghezza, superficie, volume' },
-  { id: 'm3', sym: 'm',  dim: 3, q: 'volume',                g: 'Lunghezza, superficie, volume' },
-  { id: 'g',  sym: 'g',  dim: 1, q: 'massa',                 g: 'Altre grandezze fondamentali', siK: 3 },
-  { id: 's',  sym: 's',  dim: 1, q: 'tempo',                 g: 'Altre grandezze fondamentali' },
-  { id: 'A',  sym: 'A',  dim: 1, q: 'corrente elettrica',    g: 'Altre grandezze fondamentali' },
-  { id: 'K',  sym: 'K',  dim: 1, q: 'temperatura',           g: 'Altre grandezze fondamentali' },
-  { id: 'mol',sym: 'mol',dim: 1, q: 'quantità di sostanza',  g: 'Altre grandezze fondamentali' },
-  { id: 'cd', sym: 'cd', dim: 1, q: 'intensità luminosa',    g: 'Altre grandezze fondamentali' },
-  { id: 'Hz', sym: 'Hz', dim: 1, q: 'frequenza',             g: 'Grandezze derivate' },
-  { id: 'N',  sym: 'N',  dim: 1, q: 'forza',                 g: 'Grandezze derivate' },
-  { id: 'Pa', sym: 'Pa', dim: 1, q: 'pressione',             g: 'Grandezze derivate' },
-  { id: 'J',  sym: 'J',  dim: 1, q: 'energia',               g: 'Grandezze derivate' },
-  { id: 'W',  sym: 'W',  dim: 1, q: 'potenza',               g: 'Grandezze derivate' },
-  { id: 'C',  sym: 'C',  dim: 1, q: 'carica elettrica',      g: 'Grandezze derivate' },
-  { id: 'V',  sym: 'V',  dim: 1, q: 'tensione elettrica',    g: 'Grandezze derivate' },
-  { id: 'Ohm',sym: 'Ω',  dim: 1, q: 'resistenza elettrica',  g: 'Grandezze derivate' },
-  { id: 'F',  sym: 'F',  dim: 1, q: 'capacità elettrica',    g: 'Grandezze derivate' },
-  { id: 'T',  sym: 'T',  dim: 1, q: 'campo magnetico',       g: 'Grandezze derivate' },
-  { id: 'Wb', sym: 'Wb', dim: 1, q: 'flusso magnetico',      g: 'Grandezze derivate' },
-  { id: 'H',  sym: 'H',  dim: 1, q: 'induttanza',            g: 'Grandezze derivate' },
+  { id: 'm',  sym: 'm',  dim: 1, q: 'lunghezza',             g: 'Unità fondamentali del SI' },
+  { id: 'm2', sym: 'm',  dim: 2, q: 'superficie',            g: 'Superficie e volume' },
+  { id: 'm3', sym: 'm',  dim: 3, q: 'volume',                g: 'Superficie e volume' },
+  { id: 'kg', sym: 'g',  dim: 1, q: 'massa',                 g: 'Unità fondamentali del SI', siK: 3, baseK: 3, label: 'kg — massa (unità SI)' },
+  { id: 'g',  sym: 'g',  dim: 1, q: 'massa',                 g: 'Grammo e unità derivate', siK: 3, label: 'g — massa (grammo)' },
+  { id: 's',  sym: 's',  dim: 1, q: 'tempo',                 g: 'Unità fondamentali del SI' },
+  { id: 'A',  sym: 'A',  dim: 1, q: 'corrente elettrica',    g: 'Unità fondamentali del SI' },
+  { id: 'K',  sym: 'K',  dim: 1, q: 'temperatura',           g: 'Unità fondamentali del SI' },
+  { id: 'mol',sym: 'mol',dim: 1, q: 'quantità di sostanza',  g: 'Unità fondamentali del SI' },
+  { id: 'cd', sym: 'cd', dim: 1, q: 'intensità luminosa',    g: 'Unità fondamentali del SI' },
+  { id: 'Hz', sym: 'Hz', dim: 1, q: 'frequenza',             g: 'Grammo e unità derivate' },
+  { id: 'N',  sym: 'N',  dim: 1, q: 'forza',                 g: 'Grammo e unità derivate' },
+  { id: 'Pa', sym: 'Pa', dim: 1, q: 'pressione',             g: 'Grammo e unità derivate' },
+  { id: 'J',  sym: 'J',  dim: 1, q: 'energia',               g: 'Grammo e unità derivate' },
+  { id: 'W',  sym: 'W',  dim: 1, q: 'potenza',               g: 'Grammo e unità derivate' },
+  { id: 'C',  sym: 'C',  dim: 1, q: 'carica elettrica',      g: 'Grammo e unità derivate' },
+  { id: 'V',  sym: 'V',  dim: 1, q: 'tensione elettrica',    g: 'Grammo e unità derivate' },
+  { id: 'Ohm',sym: 'Ω',  dim: 1, q: 'resistenza elettrica',  g: 'Grammo e unità derivate' },
+  { id: 'F',  sym: 'F',  dim: 1, q: 'capacità elettrica',    g: 'Grammo e unità derivate' },
+  { id: 'T',  sym: 'T',  dim: 1, q: 'campo magnetico',       g: 'Grammo e unità derivate' },
+  { id: 'Wb', sym: 'Wb', dim: 1, q: 'flusso magnetico',      g: 'Grammo e unità derivate' },
+  { id: 'H',  sym: 'H',  dim: 1, q: 'induttanza',            g: 'Grammo e unità derivate' },
 ];
 const UNIT = new Map(UNITS.map(u => [u.id, u]));
 
@@ -62,8 +63,11 @@ const EXAMPLES = [
   ['Volume di una bottiglia d’acqua (1,5 L)', '1,5', -1, 'm3'],
   ['Massa di una formica', '3', -3, 'g'],
   ['Massa di un granello di sabbia', '0,67', -3, 'g'],
-  ['Massa di un’automobile', '1200', 3, 'g'],
+  ['Massa di un’automobile', '1200', 3, 'kg'],
   ['Massa di una moneta da 1 euro', '7,5', 0, 'g'],
+  ['Massa di uno studente', '60', 3, 'kg'],
+  ['Massa di una balena azzurra', '150', 6, 'g'],
+  ['Massa di una zanzara', '2,5', -3, 'g'],
   ['Durata di un battito cardiaco', '0,8', 0, 's'],
   ['Tempo di reazione umano', '250', -3, 's'],
   ['Un ciclo di clock di un processore', '0,3', -9, 's'],
@@ -175,11 +179,14 @@ function sciHTML(v, s, unitH) {
   const w = shiftV(v, -s);
   return `<span class="sig">${mantString(w)}</span> × <span class="pow">${powHTML(sciExp(w))}</span>${unitH ? ' ' + unitH : ''}`;
 }
-let odgRule = localStorage.getItem('odgRule') || '5';
+// ------------------------------------------------------------------ impostazioni
+const DEFAULTS = { decPrefix: true, sciPrefix: false, odgPrefix: false, fundamental: false, scores: true, odgRule: '5' };
+const S = Object.assign({}, DEFAULTS, (() => { try { return JSON.parse(localStorage.getItem('mconvert-settings') || '{}'); } catch { return {}; } })());
+const saveSettings = () => { try { localStorage.setItem('mconvert-settings', JSON.stringify(S)); } catch {} };
 function odgOf(v, s) {
   const w = shiftV(v, -s);
   if (isZero(w)) return null;
-  const thr = odgRule === '5' ? 5 : Math.sqrt(10);
+  const thr = S.odgRule === '5' ? 5 : Math.sqrt(10);
   return mantFloat(w) >= thr ? sciExp(w) + 1 : sciExp(w);
 }
 
@@ -188,8 +195,12 @@ const dimSup = d => d === 2 ? '²' : d === 3 ? '³' : '';
 const unitHTML = (k, u) => `<span class="u">${PFX.get(k)?.s ?? ''}${u.sym}${u.dim > 1 ? sup(u.dim) : ''}</span>`;
 const unitText = (k, u) => `${PFX.get(k)?.s ?? ''}${u.sym}${dimSup(u.dim)}`;
 const siK = u => u.siK || 0;
+const baseK = u => u.baseK || 0;
+const FUNDAMENTAL = ['m', 'm2', 'm3', 'kg', 's', 'A', 'K', 'mol', 'cd'];
+const allowedUnits = () => S.fundamental ? UNITS.filter(u => FUNDAMENTAL.includes(u.id)) : UNITS;
+const unitAllowed = u => allowedUnits().includes(u);
 // h, da, d, c si usano quasi solo con lunghezze e masse (eccezione comune: hPa)
-const usualKs = (u, ks) => ['m', 'm2', 'm3', 'g'].includes(u.id) ? ks : ks.filter(k => k % 3 === 0 || (u.id === 'Pa' && k === 2));
+const usualKs = (u, ks) => ['m', 'm2', 'm3', 'g', 'kg'].includes(u.id) ? ks : ks.filter(k => k % 3 === 0 || (u.id === 'Pa' && k === 2));
 const rnd = n => Math.floor(Math.random() * n);
 const pick = a => a[rnd(a.length)];
 const $ = id => document.getElementById(id);
@@ -400,22 +411,32 @@ class PrefixTable {
 // ------------------------------------------------------------------ vista CONVERSIONI
 const cv = { unit: UNIT.get('m'), v: { d: '35', e: -6 }, k: -6, previewK: null };
 let convTable;
+const kDecOf = () => S.decPrefix ? cv.k : baseK(cv.unit);
+const kSciOf = () => S.sciPrefix ? cv.k : baseK(cv.unit);
+const kOdgOf = () => S.odgPrefix ? cv.k : baseK(cv.unit);
 
-function initConvert() {
-  // select unità
-  const us = $('unitSelect');
+function fillUnitSelect(sel) {
+  sel.innerHTML = '';
   const groups = {};
-  UNITS.forEach(u => {
-    if (!groups[u.g]) { groups[u.g] = el('optgroup'); groups[u.g].label = u.g; us.appendChild(groups[u.g]); }
+  allowedUnits().forEach(u => {
+    if (!groups[u.g]) { groups[u.g] = el('optgroup'); groups[u.g].label = u.g; sel.appendChild(groups[u.g]); }
     const o = el('option'); o.value = u.id;
-    o.textContent = `${u.sym}${dimSup(u.dim)} — ${u.q}`;
+    o.textContent = u.label || `${u.sym}${dimSup(u.dim)} — ${u.q}`;
     groups[u.g].appendChild(o);
   });
+}
+
+function initConvert() {
+  const us = $('unitSelect');
+  fillUnitSelect(us);
   us.addEventListener('change', () => {
     const nu = UNIT.get(us.value);
-    // mantiene il numero scritto e il prefisso, cambia l'unità
-    const numeral = shiftV(cv.v, -cv.k * cv.unit.dim);
-    cv.unit = nu; cv.v = shiftV(numeral, cv.k * nu.dim);
+    // mantiene il numero scritto nella notazione decimale e cambia solo l'unità
+    const numeral = shiftV(cv.v, -kDecOf() * cv.unit.dim);
+    if (!S.decPrefix || cv.k === baseK(cv.unit)) cv.k = baseK(nu);
+    cv.unit = nu;
+    cv.v = shiftV(numeral, kDecOf() * nu.dim);
+    cv.previewK = null;
     $('exampleCaption').textContent = '';
     renderConvert(true);
   });
@@ -423,47 +444,43 @@ function initConvert() {
   convTable = new PrefixTable($('convTable'), {
     pickable: true, draggable: true,
     onPreview: k => { cv.previewK = k; renderConvert(); },
-    onPick: k => { cv.k = k; cv.previewK = null; renderConvert(); flash('decDisplay'); },
+    onPick: k => { cv.k = k; cv.previewK = null; renderConvert(); flash(S.decPrefix ? 'decDisplay' : 'readout'); },
     onShift: n => { cv.v = shiftV(cv.v, n); renderConvert(); },
   });
 
-  $('decMul').addEventListener('click', () => { cv.v = shiftV(cv.v, 1); renderConvert(); });
-  $('decDiv').addEventListener('click', () => { cv.v = shiftV(cv.v, -1); renderConvert(); });
-  $('expUp').addEventListener('click', () => { cv.v = shiftV(cv.v, 1); renderConvert(); });
-  $('expDown').addEventListener('click', () => { cv.v = shiftV(cv.v, -1); renderConvert(); });
+  const mul = n => () => { cv.v = shiftV(cv.v, n); renderConvert(); };
+  $('decMul').addEventListener('click', mul(1));
+  $('decDiv').addEventListener('click', mul(-1));
+  $('expUp').addEventListener('click', mul(1));
+  $('expDown').addEventListener('click', mul(-1));
   $('decPrefix').addEventListener('change', e => { cv.k = +e.target.value; renderConvert(); });
-  $('odgRule').value = odgRule;
-  $('odgRule').addEventListener('change', e => { odgRule = e.target.value; localStorage.setItem('odgRule', odgRule); renderConvert(); });
-  $('bestPrefix').addEventListener('click', () => { const b = bestPrefix(cv.v, cv.unit); cv.k = b; renderConvert(); flash('decDisplay'); });
+  $('bestPrefix').addEventListener('click', () => { cv.k = bestPrefix(cv.v, cv.unit); renderConvert(); flash(S.decPrefix ? 'decDisplay' : 'readout'); });
 
-  // modifica: decimale
   editable($('decDisplay'), $('decInput'),
-    () => decString(cv.v, cv.k * cv.unit.dim),
-    str => { const p = parseNum(str); if (!p) return false; cv.v = shiftV(p, cv.k * cv.unit.dim); renderConvert(false, 'dec'); return true; });
-  // modifica: coefficiente
+    () => decString(cv.v, kDecOf() * cv.unit.dim),
+    str => { const p = parseNum(str); if (!p) return false; cv.v = shiftV(p, kDecOf() * cv.unit.dim); renderConvert(false, 'dec'); return true; });
   editable($('sciMant'), $('sciMantInput'),
-    () => mantString(shiftV(cv.v, -cv.k * cv.unit.dim)),
+    () => mantString(shiftV(cv.v, -kSciOf() * cv.unit.dim)),
     str => {
       const p = parseNum(str); if (!p) return false;
-      const n = sciExp(shiftV(cv.v, -cv.k * cv.unit.dim));
-      cv.v = shiftV(p, n + cv.k * cv.unit.dim); renderConvert(false, 'mant'); return true;
+      const s = kSciOf() * cv.unit.dim;
+      cv.v = shiftV(p, sciExp(shiftV(cv.v, -s)) + s); renderConvert(false, 'mant'); return true;
     });
-  // modifica: esponente
   editable($('sciExp'), $('sciExpInput'),
-    () => String(sciExp(shiftV(cv.v, -cv.k * cv.unit.dim))),
+    () => String(sciExp(shiftV(cv.v, -kSciOf() * cv.unit.dim))),
     str => {
-      const s = str.trim().replace(/[−–]/g, '-');
-      if (!/^[+-]?\d{1,3}$/.test(s)) return false;
-      const n = parseInt(s, 10);
-      const w = shiftV(cv.v, -cv.k * cv.unit.dim);
-      cv.v = shiftV(cv.v, n - sciExp(w)); renderConvert(false, 'exp'); return true;
+      const t = str.trim().replace(/[−–]/g, '-');
+      if (!/^[+-]?\d{1,3}$/.test(t)) return false;
+      const w = shiftV(cv.v, -kSciOf() * cv.unit.dim);
+      cv.v = shiftV(cv.v, parseInt(t, 10) - sciExp(w)); renderConvert(false, 'exp'); return true;
     });
 
-  $('newExample').addEventListener('click', newExample);
-  newExample();
+  $('exampleSameUnit').addEventListener('click', exampleSameUnit);
+  $('exampleNewUnit').addEventListener('click', exampleNewUnit);
+  exampleNewUnit();
 }
 
-/** Rende un display cliccabile modificabile tramite un input (con aggiornamento in tempo reale). */
+/** Display cliccabile che diventa un campo di testo (aggiorna le altre notazioni mentre si scrive). */
 function editable(display, input, getText, apply) {
   let original = null;
   const open = () => {
@@ -489,8 +506,7 @@ function editable(display, input, getText, apply) {
 }
 
 function bestPrefix(v, u) {
-  if (isZero(v)) return 0;
-  // prefisso "ingegneristico": valore tra 1 e 1000 (per m², m³ si preferiscono comunque k, M… e le cifre tra 1 e 10^(3·dim))
+  if (isZero(v)) return baseK(u);
   const named = [...PFX.keys()].filter(k => k % 3 === 0).sort((a, b) => b - a);
   for (const k of named) if (v.e + v.d.length - 1 >= k * u.dim) return k;
   return K_MIN;
@@ -500,150 +516,217 @@ function stepsText(from, to, d) {
   const steps = (to - from) * d;
   if (steps === 0) return '';
   const n = Math.abs(steps);
-  const dir = steps > 0 ? 'sinistra' : 'destra';
-  const res = steps > 0 ? `${times(n)} volte più piccolo` : `${times(n)} volte più grande`;
-  return `La virgola si sposta di <b>${n}</b> ${plural(n, 'posto', 'posti')} verso ${dir}: il numero diventa ${res} perché l’unità è ${steps > 0 ? 'più grande' : 'più piccola'}.`;
+  return `La virgola si sposta di <b>${n}</b> ${plural(n, 'posto', 'posti')} verso ${steps > 0 ? 'sinistra' : 'destra'}: il numero diventa ${times(n)} volte più ${steps > 0 ? 'piccolo' : 'grande'} perché l’unità è ${steps > 0 ? 'più grande' : 'più piccola'}.`;
 }
 
 function renderConvert(unitChanged = false, editing = null) {
-  const u = cv.unit, d = u.dim, s = cv.k * d, v = cv.v;
+  const u = cv.unit, d = u.dim, v = cv.v;
+  const kDec = kDecOf(), kSci = kSciOf(), kOdg = kOdgOf();
   $('unitSelect').value = u.id;
-  // select prefisso
+  // decimale
   const ps = $('decPrefix');
   if (unitChanged || ps.dataset.unit !== u.id) {
     ps.innerHTML = PREFIXES.map(p => `<option value="${p.k}">${unitText(p.k, u)}</option>`).join('');
     ps.dataset.unit = u.id;
   }
   ps.value = cv.k;
-  // 1. decimale
-  if (editing !== 'dec') $('decDisplay').innerHTML = decHTML(v, s);
-  const len = decLength(v, s);
-  $('decDisplay').classList.toggle('long', len > 16);
-  $('decDisplay').classList.toggle('very-long', len > 28);
-  // 2. tabella
+  ps.hidden = !S.decPrefix;
+  $('decUnit').hidden = S.decPrefix;
+  $('decUnit').innerHTML = unitHTML(kDec, u);
+  if (editing !== 'dec') $('decDisplay').innerHTML = decHTML(v, kDec * d);
+  const len = decLength(v, kDec * d);
+  $('decDisplay').classList.toggle('long', len > 14);
+  $('decDisplay').classList.toggle('very-long', len > 24);
+  // tabella
   convTable.setUnit(u);
   const shownK = cv.previewK ?? cv.k;
   convTable.update({ v, k: shownK, activeK: shownK, currentK: cv.k });
-  const ro = $('readout');
-  const left = `<span class="ro-num">${decHTML(v, s)}</span>&nbsp;${unitHTML(cv.k, u)}`;
+  const left = `<span class="ro-num">${decHTML(v, cv.k * d)}</span>&nbsp;${unitHTML(cv.k, u)}`;
   if (cv.previewK != null && cv.previewK !== cv.k) {
     const pk = cv.previewK;
-    ro.innerHTML = `<div class="ro-main">${left} <span class="ro-eq">=</span> <span class="ro-num hl">${decHTML(v, pk * d)}</span>&nbsp;${unitHTML(pk, u)}</div>
-      <div class="ro-why">${stepsText(cv.k, pk, d)} <span class="muted">(tocca il prefisso per sceglierlo)</span></div>`;
+    $('readout').innerHTML = `<div class="ro-main">${left} <span class="ro-eq">=</span> <span class="ro-num hl">${decHTML(v, pk * d)}</span>&nbsp;${unitHTML(pk, u)}</div>
+      <div class="ro-why">${stepsText(cv.k, pk, d)}</div>`;
   } else {
-    ro.innerHTML = `<div class="ro-main">${left}</div>
-      <div class="ro-why muted">La virgola sta subito dopo la colonna di <b>${unitHTML(cv.k, u)}</b>. Le cifre restano ferme: cambiando prefisso si sposta solo la virgola.</div>`;
+    $('readout').innerHTML = `<div class="ro-main">${left}</div>
+      <div class="ro-why muted">La virgola sta dopo la colonna di <b>${unitHTML(cv.k, u)}</b>: cambiando prefisso le cifre restano ferme e si sposta solo la virgola.</div>`;
   }
   const b = bestPrefix(v, u);
-  const bb = $('bestPrefix');
-  bb.innerHTML = `Prefisso più comodo: <b>${decText(v, b * d)}&nbsp;${unitHTML(b, u)}</b>`;
-  bb.disabled = b === cv.k;
+  $('bestPrefix').innerHTML = `Prefisso più comodo:<br><b>${decText(v, b * d)}&nbsp;${unitHTML(b, u)}</b>`;
+  $('bestPrefix').disabled = b === cv.k;
   $('dimNote').innerHTML = d === 1 ? '' :
     `Unità ${d === 2 ? 'al quadrato' : 'al cubo'}: ogni prefisso ha <b>${d}</b> colonne, perché 1&nbsp;${unitHTML(3, u)} = (10${sup(3)}&nbsp;m)${sup(d)} = 10${sup(3 * d)}&nbsp;${unitHTML(0, u)}.` +
     (d === 3 ? ` Ricorda: 1&nbsp;dm${sup(3)} = 1&nbsp;L e 1&nbsp;cm${sup(3)} = 1&nbsp;mL.` : '');
-  // 3. scientifica
-  const w = shiftV(v, -s);
+  $('dimNote').hidden = d === 1;
+  // scientifica
+  const w = shiftV(v, -kSci * d);
   if (editing !== 'mant') $('sciMant').innerHTML = `<span class="sig">${mantString(w)}</span>`;
   if (editing !== 'exp') $('sciExp').textContent = (sciExp(w) < 0 ? '−' + (-sciExp(w)) : sciExp(w));
-  $('sciUnit').innerHTML = unitHTML(cv.k, u);
-  const o = odgOf(v, s);
-  $('odgVal').innerHTML = o == null ? '—' : `<span class="pow">${powHTML(o)}</span> ${unitHTML(cv.k, u)}`;
-  const mf = isZero(w) ? 0 : mantFloat(w);
-  const thr = odgRule === '5' ? '5' : '√10';
+  $('sciUnit').innerHTML = unitHTML(kSci, u);
+  const o = odgOf(v, kOdg * d);
+  $('odgVal').innerHTML = o == null ? '—' : `<span class="pow">${powHTML(o)}</span>&nbsp;${unitHTML(kOdg, u)}`;
+  const wo = shiftV(v, -kOdg * d);
   $('sciHint').innerHTML = isZero(w) ? '' :
-    `Il coefficiente è sempre tra 1 e 10. Qui ${mantString(w)} ${o === sciExp(w) ? '&lt;' : '≥'} ${thr}, quindi l’ordine di grandezza è 10${sup(o)}.` +
-    ` <span class="muted">Usa ▲▼ per far crescere o calare la potenza: guarda come si spostano gli zeri.</span>`;
-  void mf;
+    `coefficiente tra 1 e 10 · ▲▼ fanno crescere o calare la potenza` +
+    (o == null ? '' : ` · ordine di grandezza: ${mantString(wo)} ${o === sciExp(wo) ? '&lt;' : '≥'} ${S.odgRule === '5' ? '5' : '√10'}`);
   const sk = siK(u);
-  $('siLine').innerHTML = (cv.k === sk) ? '' :
+  $('siLine').innerHTML = (kSci === sk) ? '' :
     `Nell’unità SI: ${sciHTML(v, sk * d, unitHTML(sk, u))} &nbsp;=&nbsp; <span class="num">${decHTML(v, sk * d)}</span>&nbsp;${unitHTML(sk, u)}`;
+  $('siLine').hidden = kSci === sk;
 }
 
 function flash(id) { const e = $(id); e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); }
 function shake(e) { e.classList.remove('shake'); void e.offsetWidth; e.classList.add('shake'); }
 
-// esempi: un sacchetto mescolato, mai lo stesso due volte di fila
+// ------------------------------------------------------------------ esempi
 let exBag = [], lastEx = null;
-function newExample() {
-  let ex;
-  if (Math.random() < 0.22) ex = randomExample();
-  else {
-    if (!exBag.length) { exBag = EXAMPLES.slice().sort(() => Math.random() - 0.5); if (exBag[exBag.length - 1] === lastEx) exBag.unshift(exBag.pop()); }
-    ex = exBag.pop(); lastEx = ex;
-  }
-  const [label, num, k, uid] = ex;
-  const u = UNIT.get(uid);
+function exampleUnit(e) {
+  const u = UNIT.get(e[3]);
+  if (unitAllowed(u)) return u;
+  if (u.q === 'massa') return UNIT.get('kg');
+  return null;
+}
+function loadExample(e, u) {
+  const [label, num, k] = e;
   cv.unit = u; cv.k = k; cv.v = shiftV(parseNum(num), k * u.dim); cv.previewK = null;
-  $('exampleCaption').innerHTML = `<b>${label}</b>: ${decText(cv.v, k * u.dim)}&nbsp;${unitHTML(k, u)} <span class="muted">— prova a toccare gli altri prefissi</span>`;
+  $('exampleCaption').innerHTML = `<b>${label}</b>: ${decText(cv.v, k * u.dim)}&nbsp;${unitHTML(k, u)}`;
   renderConvert(true);
   flash('decDisplay');
 }
-function randomExample() {
-  const u = pick(UNITS);
-  const ks = usualKs(u, PREFIXES.map(p => p.k).filter(k => u.dim === 1 || Math.abs(k) <= 6));
+function exampleSameUnit() {
+  const u = cv.unit;
+  const pool = EXAMPLES.filter(e => { const eu = UNIT.get(e[3]); return eu.q === u.q && eu.dim === u.dim && e !== lastEx; });
+  if (!pool.length || Math.random() < 0.3) loadExample(randomExample(u), u);
+  else { const e = pick(pool); lastEx = e; loadExample(e, u); }
+}
+function exampleNewUnit() {
+  const cur = cv.unit;
+  if (Math.random() < 0.2) {
+    const us = allowedUnits().filter(x => x.q !== cur.q);
+    const u = pick(us.length ? us : allowedUnits());
+    loadExample(randomExample(u), u); return;
+  }
+  for (let t = 0; t < 200; t++) {
+    if (!exBag.length) exBag = EXAMPLES.slice().sort(() => Math.random() - 0.5);
+    const e = exBag.pop();
+    const u = exampleUnit(e);
+    if (!u || (u.q === cur.q && t < 150) || e === lastEx) continue;
+    lastEx = e; loadExample(e, u); return;
+  }
+  loadExample(randomExample(cur), cur);
+}
+function randomExample(u) {
+  const ks = usualKs(u, PREFIXES.map(p => p.k).filter(k => Math.abs(k) <= (u.dim === 1 ? 9 : 6)));
   const k = pick(ks);
   const L = 1 + rnd(3);
   let d = String(1 + rnd(9));
   for (let i = 1; i < L; i++) d += (i === L - 1 ? 1 + rnd(9) : rnd(10));
-  const n = rnd(7) - 3; // esponente nell'unità scelta
-  const v = norm(d, n - (L - 1));
+  const v = norm(d, rnd(7) - 3 - (L - 1));
   return ['Numero a caso', decString(v, 0), k, u.id];
 }
 
 // ------------------------------------------------------------------ vista ESERCITATI
 const LEVELS = {
-  base:     { ks: [3, 2, 1, 0, -1, -2, -3], units: ['m', 'g', 's', 'A', 'V', 'W', 'J', 'N', 'Pa', 'Hz'], dims: false, maxLen: 9 },
+  base:     { ks: [3, 2, 1, 0, -1, -2, -3], units: ['m', 'g', 'kg', 's', 'A', 'V', 'W', 'J', 'N', 'Pa', 'Hz'], dims: false, maxLen: 9 },
   medio:    { ks: PREFIXES.map(p => p.k), units: UNITS.filter(u => u.dim === 1).map(u => u.id), dims: false, maxLen: 14 },
   avanzato: { ks: PREFIXES.map(p => p.k), units: UNITS.map(u => u.id), dims: true, maxLen: 16 },
 };
 const score = { pts: 0, streak: 0, done: 0 };
 let ex = null;
+let mode = 'train';
+let duel = null;
 
 function initPractice() {
   const ls = $('levelSelect');
   ls.value = localStorage.getItem('level') || 'base';
-  ls.addEventListener('change', () => { localStorage.setItem('level', ls.value); newExercise(); });
+  ls.addEventListener('change', () => { localStorage.setItem('level', ls.value); if (mode === 'train') newExercise(); });
   $('newExercise').addEventListener('click', newExercise);
+  document.querySelectorAll('.seg-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  $('duelStart').addEventListener('click', startDuel);
 }
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  duel = null;
+  $('duelBar').hidden = true;
+  $('levelSelect').disabled = false;
+  if (m === 'train') {
+    $('duelSetup').hidden = true;
+    $('newExercise').hidden = false;
+    $('givenCard').hidden = false; $('steps').hidden = false;
+    newExercise();
+  } else {
+    $('duelSetup').hidden = false;
+    $('newExercise').hidden = true;
+    $('givenCard').hidden = true; $('steps').hidden = true;
+  }
+  updateScoreVisibility();
+}
+function updateScoreVisibility() { $('scoreBox').hidden = mode !== 'train' || !S.scores; }
+
+function startDuel() {
+  const n1 = $('p1Name').value.trim() || 'Giocatore 1', n2 = $('p2Name').value.trim() || 'Giocatore 2';
+  duel = { names: [n1, n2], pts: [0, 0], time: [0, 0], rounds: +$('duelRounds').value, turns: 0, cur: 0 };
+  $('duelSetup').hidden = true;
+  $('duelBar').hidden = false;
+  $('levelSelect').disabled = true;
+  $('givenCard').hidden = false; $('steps').hidden = false;
+  newExercise();
+}
+const fmtTime = s => { s = Math.round(s); const m = Math.floor(s / 60); return m ? `${m} min ${s % 60} s` : `${s} s`; };
+function renderDuelBar() {
+  if (!duel) return;
+  const round = Math.min(duel.rounds, Math.floor(duel.turns / 2) + 1);
+  $('duelBar').innerHTML = [0, 1].map(i => `
+    <div class="player${i === duel.cur ? ' on' : ''}">
+      <div class="pl-name">${escapeHTML(duel.names[i])}${i === duel.cur ? ' <span class="pl-turn">tocca a te</span>' : ''}</div>
+      <div class="pl-pts"><b>${duel.pts[i]}</b> punti</div>
+      <div class="pl-time">${fmtTime(duel.time[i])}</div>
+    </div>`).join(`<div class="duel-round">Turno<br><b>${round}</b> di ${duel.rounds}</div>`);
+}
+const escapeHTML = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function genExercise(level) {
   const L = LEVELS[level];
-  for (let tries = 0; tries < 500; tries++) {
-    let uid = pick(L.units);
+  let units = L.units.filter(id => unitAllowed(UNIT.get(id)));
+  if (!units.length) units = ['m'];
+  for (let tries = 0; tries < 800; tries++) {
+    let uid = pick(units);
     if (L.dims && Math.random() < 0.45) uid = pick(['m2', 'm3']);
-    const u = UNIT.get(uid), d = u.dim;
+    const u = UNIT.get(uid), d = u.dim, b = baseK(u);
     const ks = usualKs(u, L.ks.filter(k => d === 1 || Math.abs(k) <= 6 || Math.random() < 0.3));
-    if (ks.length < 2) continue;
-    const kA = pick(ks);
-    let kB = pick(ks.filter(k => k !== kA));
-    if (kB === undefined) continue;
+    if (!ks.includes(b)) ks.push(b);
+    const given = pick(['dec', 'dec', 'sci', 'tab']);
+    const kA = (given === 'dec' && !S.decPrefix) || (given === 'sci' && !S.sciPrefix) ? b : pick(ks);
+    const others = ks.filter(k => k !== kA);
+    if (!others.length) continue;
+    const kB = pick(others);
+    const kDec = S.decPrefix ? kB : b, kSci = S.sciPrefix ? kB : b, kOdg = S.odgPrefix ? kB : b;
+    if (level === 'base' && Math.abs(kA - kB) > 4) continue;
     const len = 1 + rnd(3);
     let digs = String(1 + rnd(9));
     for (let i = 1; i < len; i++) digs += (i === len - 1 ? 1 + rnd(9) : rnd(10));
-    const nA = rnd(7) - 3;
-    const v = norm(digs, nA - (len - 1) + kA * d);
-    const lA = decLength(v, kA * d), lB = decLength(v, kB * d);
-    if (lA > L.maxLen || lB > L.maxLen) continue;
-    const hi = v.e + v.d.length - 1;
-    if (hi > K_MAX * d + d - 1 || v.e < K_MIN * d) continue;
-    if (level === 'base' && Math.abs(kA - kB) > 4) continue;
-    const given = pick(['dec', 'dec', 'sci', 'tab']);
-    return { u, v, kA, kB, given, level };
+    const v = norm(digs, rnd(7) - 3 - (len - 1) + kA * d);
+    if (decLength(v, kA * d) > L.maxLen || decLength(v, kDec * d) > L.maxLen) continue;
+    if (v.e + v.d.length - 1 > K_MAX * d + d - 1 || v.e < K_MIN * d) continue;
+    return { u, v, kA, kB, kDec, kSci, kOdg, given, level };
   }
-  return { u: UNIT.get('m'), v: { d: '35', e: 0 }, kA: 0, kB: -2, given: 'dec', level };
+  return { u: UNIT.get('m'), v: { d: '35', e: 0 }, kA: 0, kB: -2, kDec: -2, kSci: 0, kOdg: 0, given: 'dec', level };
 }
 
 function newExercise() {
-  const level = $('levelSelect').value;
-  ex = genExercise(level);
+  ex = genExercise($('levelSelect').value);
   const steps = [];
   if (ex.given !== 'tab') steps.push({ type: 'tab' });
-  steps.push({ type: 'dec' }, { type: 'sci' }, { type: 'odg' });
-  ex.steps = steps; ex.cur = 0;
+  if (!(ex.given === 'dec' && ex.kDec === ex.kA)) steps.push({ type: 'dec' });
+  if (!(ex.given === 'sci' && ex.kSci === ex.kA)) steps.push({ type: 'sci' });
+  steps.push({ type: 'odg' });
+  ex.steps = steps; ex.cur = 0; ex.pts = 0; ex.t0 = performance.now();
   renderGiven();
   const host = $('steps'); host.innerHTML = '';
   steps.forEach((st, i) => { st.i = i; st.tries = 0; st.solved = false; st.card = el('section', 'card step locked'); host.appendChild(st.card); mountStep(st); });
   activate(0);
+  renderDuelBar();
 }
 
 function renderGiven() {
@@ -655,23 +738,21 @@ function renderGiven() {
   if (given === 'dec') body = `<div class="given-val"><span class="num">${decHTML(v, kA * d)}</span>&nbsp;${uh}</div>`;
   if (given === 'sci') body = `<div class="given-val">${sciHTML(v, kA * d, uh)}</div>`;
   if (given === 'tab') body = `<div class="given-tab"></div><p class="hint">La virgola è dopo la colonna di <b>${uh}</b>.</p>`;
-  g.innerHTML = `<div class="given-head"><span class="badge">Consegna</span> Una misura di <b>${u.q}</b> è scritta in <b>${name}</b>. Riscrivila nelle altre notazioni, un passo alla volta.</div>${body}`;
+  const who = duel ? `<b>${escapeHTML(duel.names[duel.cur])}</b>: u` : 'U';
+  g.innerHTML = `<div class="given-head"><span class="badge">Consegna</span> ${who}na misura di <b>${u.q}</b> è scritta in <b>${name}</b>. Riscrivila nelle altre notazioni, un passo alla volta.</div>${body}`;
   if (given === 'tab') {
     const t = new PrefixTable(g.querySelector('.given-tab'), { pickable: false, draggable: false });
     t.setUnit(u);
     t.update({ v, k: kA, activeK: kA });
-  }
+    ex.givenTable = t;
+  } else ex.givenTable = null;
 }
 
-function stepHead(st, title) {
-  return `<div class="step-head"><span class="step-n">${st.i + 1}</span><h3>${title}</h3><span class="step-status"></span></div>`;
-}
-function stepFoot() {
-  return `<div class="step-foot"><button class="btn primary check">Verifica</button><button class="btn ghost solve">Mostra soluzione</button><div class="feedback" aria-live="polite"></div></div>`;
-}
+const stepHead = (st, title) => `<div class="step-head"><span class="step-n">${st.i + 1}</span><h3>${title}</h3><span class="step-status"></span></div>`;
+const stepFoot = () => `<div class="step-foot"><button class="btn primary check">Verifica</button><button class="btn ghost solve">Mostra soluzione</button><div class="feedback" aria-live="polite"></div></div>`;
 
 function mountStep(st) {
-  const { u, v, kA, kB } = ex, d = u.dim;
+  const { u, v, kA, kDec, kSci, kOdg } = ex, d = u.dim;
   const c = st.card;
   if (st.type === 'tab') {
     st.off = 0; while (st.off === 0) st.off = rnd(9) - 4;
@@ -698,23 +779,24 @@ function mountStep(st) {
     st.solve = () => { st.off = 0; };
   }
   if (st.type === 'dec') {
-    // si parte dal numero scritto come nell'unità della consegna, ma accanto al nuovo prefisso
-    st.off = (kB - kA) * d;
-    c.innerHTML = stepHead(st, `Scrivi in notazione decimale in ${unitHTML(kB, u)}`) +
-      `<div class="step-body"><p class="instr">Il numero è stato copiato così com'era, ma ora l’unità è <b>${unitHTML(kB, u)}</b>. Sposta la virgola: gli zeri compaiono da soli.</p>
+    // si parte dal numero scritto come nell'unità della consegna, ma accanto alla nuova unità
+    st.off = (kDec - kA) * d;
+    const same = st.off === 0;
+    if (same) st.off = pick([-3, -2, -1, 1, 2, 3]);
+    c.innerHTML = stepHead(st, `Scrivi in notazione decimale in ${unitHTML(kDec, u)}`) +
+      `<div class="step-body"><p class="instr">${same ? 'Sposta la virgola finché il numero vale quanto la consegna' : `Il numero è stato copiato così com’era, ma ora l’unità è <b>${unitHTML(kDec, u)}</b>. Sposta la virgola`}: gli zeri compaiono da soli.</p>
        <div class="move-row big"><button class="btn round mv-l" aria-label="Virgola a sinistra">◀ ,</button>
-         <div class="ex-dec"><span class="num"></span>&nbsp;${unitHTML(kB, u)}</div>
+         <div class="ex-dec"><span class="num"></span>&nbsp;${unitHTML(kDec, u)}</div>
          <button class="btn round mv-r" aria-label="Virgola a destra">, ▶</button></div>
        <label class="type-row">oppure scrivilo: <input class="type-in" inputmode="decimal" autocomplete="off" spellcheck="false"></label></div>` + stepFoot();
     const inp = c.querySelector('.type-in');
     c.querySelector('.mv-l').onclick = () => { st.custom = null; st.off -= 1; st.update(); };
     c.querySelector('.mv-r').onclick = () => { st.custom = null; st.off += 1; st.update(); };
-    inp.addEventListener('input', () => { const p = parseNum(inp.value); st.custom = p ? shiftV(p, kB * d) : null; inp.classList.toggle('invalid', !p && inp.value.trim() !== ''); st.update(true); });
+    inp.addEventListener('input', () => { const p = parseNum(inp.value); st.custom = p ? shiftV(p, kDec * d) : null; inp.classList.toggle('invalid', !p && inp.value.trim() !== ''); st.update(true); });
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') c.querySelector('.check').click(); });
     st.value = () => st.custom ?? shiftV(v, st.off);
-    st.update = (fromInput) => {
-      const sv = st.value();
-      c.querySelector('.ex-dec .num').innerHTML = decHTML(sv, kB * d);
+    st.update = fromInput => {
+      c.querySelector('.ex-dec .num').innerHTML = decHTML(st.value(), kDec * d);
       if (!fromInput) inp.value = '';
       clearFb(st);
     };
@@ -722,53 +804,51 @@ function mountStep(st) {
     st.why = () => {
       const sv = st.value();
       if (sv.d !== v.d) return 'Le cifre significative non corrispondono: devono restare <b>' + v.d.split('').join(' ') + '</b>.';
-      return wrongBy(sv.e - v.e, 'Il numero') + hintUnit(kA, kB, d);
+      return wrongBy(sv.e - v.e, 'Il numero') + hintUnit(kA, kDec, d);
     };
     st.solve = () => { st.custom = null; st.off = 0; inp.value = ''; };
   }
   if (st.type === 'sci') {
     const L = v.d.length;
-    st.p = L; st.exp = 0; // coefficiente intero, esponente 0
-    c.innerHTML = stepHead(st, `Scrivi in notazione scientifica in ${unitHTML(kB, u)}`) +
-      `<div class="step-body"><p class="instr">Il coefficiente deve stare <b>tra 1 e 10</b>. Sposta la virgola del coefficiente e regola l’esponente: guarda il valore sotto, deve restare quello giusto.</p>
+    st.p = L; st.exp = 0;
+    c.innerHTML = stepHead(st, `Scrivi in notazione scientifica in ${unitHTML(kSci, u)}`) +
+      `<div class="step-body"><p class="instr">Il coefficiente deve stare <b>tra 1 e 10</b>. Sposta la virgola del coefficiente e regola l’esponente: il valore qui sotto deve restare quello giusto.</p>
        <div class="sci-ex">
          <button class="btn round mv-l" aria-label="Virgola a sinistra">◀ ,</button>
          <span class="sig mant"></span>
          <button class="btn round mv-r" aria-label="Virgola a destra">, ▶</button>
          <span class="times">×</span><span class="ten">10</span>
          <div class="exp-ctl"><div class="exp-val"></div><div class="exp-btns"><button class="exp-btn up" aria-label="Aumenta esponente">▲</button><button class="exp-btn down" aria-label="Diminuisci esponente">▼</button></div></div>
-         <span class="unit">${unitHTML(kB, u)}</span>
+         <span class="unit">${unitHTML(kSci, u)}</span>
        </div>
-       <p class="live">Vale: <span class="num live-val"></span>&nbsp;${unitHTML(kB, u)}</p></div>` + stepFoot();
+       <p class="live">Vale: <span class="num live-val"></span>&nbsp;${unitHTML(kSci, u)}</p></div>` + stepFoot();
     c.querySelector('.mv-l').onclick = () => { if (st.p > -3) st.p -= 1; st.update(); };
     c.querySelector('.mv-r').onclick = () => { if (st.p < L + 3) st.p += 1; st.update(); };
     c.querySelector('.up').onclick = () => { st.exp += 1; st.update(); };
     c.querySelector('.down').onclick = () => { st.exp -= 1; st.update(); };
     st.mant = () => norm(v.d, st.p - L);
-    st.value = () => shiftV(st.mant(), st.exp + kB * d);
+    st.value = () => shiftV(st.mant(), st.exp + kSci * d);
     st.update = () => {
       c.querySelector('.mant').innerHTML = decHTML(st.mant(), 0);
       c.querySelector('.exp-val').textContent = st.exp < 0 ? '−' + (-st.exp) : st.exp;
-      c.querySelector('.live-val').innerHTML = decHTML(st.value(), kB * d);
+      c.querySelector('.live-val').innerHTML = decHTML(st.value(), kSci * d);
       clearFb(st);
     };
     st.check = () => st.p === 1 && eqV(st.value(), v);
     st.why = () => {
-      const okVal = eqV(st.value(), v);
-      if (okVal) return 'Il valore è giusto, ma il coefficiente deve essere <b>almeno 1 e minore di 10</b>: una sola cifra prima della virgola.';
-      const m = st.mant(); const mf = parseFloat(decString(m, 0).replace(',', '.'));
-      const coefOk = mf >= 1 && mf < 10;
-      return (coefOk ? 'Il coefficiente va bene. ' : '') + wrongBy(st.value().e - v.e, 'Il valore') + ' Correggi l’esponente.';
+      if (eqV(st.value(), v)) return 'Il valore è giusto, ma il coefficiente deve essere <b>almeno 1 e minore di 10</b>: una sola cifra prima della virgola.';
+      const mf = parseFloat(decString(st.mant(), 0).replace(',', '.'));
+      return (mf >= 1 && mf < 10 ? 'Il coefficiente va bene. ' : '') + wrongBy(st.value().e - v.e, 'Il valore') + ' Correggi l’esponente.';
     };
-    st.solve = () => { st.p = 1; st.exp = sciExp(shiftV(v, -kB * d)); };
+    st.solve = () => { st.p = 1; st.exp = sciExp(shiftV(v, -kSci * d)); };
   }
   if (st.type === 'odg') {
-    const n = sciExp(shiftV(v, -kB * d));
-    st.correct = odgOf(v, kB * d);
+    const n = sciExp(shiftV(v, -kOdg * d));
+    st.correct = odgOf(v, kOdg * d);
     const opts = [n - 1, n, n + 1, n + 2];
-    c.innerHTML = stepHead(st, `Qual è l’ordine di grandezza in ${unitHTML(kB, u)}?`) +
-      `<div class="step-body"><p class="instr">Regola usata: ${odgRule === '5' ? 'se il coefficiente è minore di 5 l’ordine di grandezza è 10<sup>n</sup>, altrimenti 10<sup>n+1</sup>' : 'se il coefficiente è minore di √10 ≈ 3,16 l’ordine di grandezza è 10<sup>n</sup>, altrimenti 10<sup>n+1</sup>'} (la puoi cambiare nella pagina Conversioni).</p>
-       <div class="odg-opts">${opts.map(o => `<button class="btn opt" data-o="${o}"><span>${powHTML(o)}&nbsp;${unitHTML(kB, u)}</span></button>`).join('')}</div></div>` + stepFoot();
+    c.innerHTML = stepHead(st, `Qual è l’ordine di grandezza in ${unitHTML(kOdg, u)}?`) +
+      `<div class="step-body"><p class="instr">Se il coefficiente è minore di ${S.odgRule === '5' ? '5' : '√10 ≈ 3,16'} l’ordine di grandezza è 10<sup>n</sup>, altrimenti 10<sup>n+1</sup>.</p>
+       <div class="odg-opts">${opts.map(o => `<button class="btn opt" data-o="${o}"><span>${powHTML(o)}&nbsp;${unitHTML(kOdg, u)}</span></button>`).join('')}</div></div>` + stepFoot();
     c.querySelector('.check').hidden = true;
     st.choice = null;
     c.querySelectorAll('.opt').forEach(b => b.onclick = () => {
@@ -779,14 +859,14 @@ function mountStep(st) {
     });
     st.update = () => clearFb(st);
     st.check = () => st.choice === st.correct;
-    st.why = () => `Il numero è ${sciHTML(v, kB * d, unitHTML(kB, u))}: guarda il coefficiente e confrontalo con ${odgRule === '5' ? '5' : '√10'}.`;
+    st.why = () => `Il numero è ${sciHTML(v, kOdg * d, unitHTML(kOdg, u))}: confronta il coefficiente con ${S.odgRule === '5' ? '5' : '√10'}.`;
     st.solve = () => { st.choice = st.correct; c.querySelectorAll('.opt').forEach(x => x.classList.toggle('chosen', +x.dataset.o === st.correct)); };
   }
   c.querySelector('.check').addEventListener('click', () => verify(st));
   c.querySelector('.solve').addEventListener('click', () => {
-    if (st.solved) return;
+    if (st.solved || ex.cur !== st.i) return;
     st.solve(); st.update(); st.shown = true;
-    finish(st, false);
+    finish(st);
   });
   st.update();
 }
@@ -797,9 +877,8 @@ function wrongBy(n, subj) {
   return `${subj} è <b>${times(a)}</b> volte troppo ${n > 0 ? 'grande' : 'piccolo'} (${a} ${plural(a, 'posto', 'posti')} di differenza).`;
 }
 function hintUnit(kA, kB, d) {
-  const st = (kB - kA) * d;
-  if (!st) return '';
-  const a = Math.abs(st);
+  const a = Math.abs((kB - kA) * d);
+  if (!a) return '';
   return ` <span class="muted">Suggerimento: nella tabella, da ${unitHTML(kA, ex.u)} a ${unitHTML(kB, ex.u)} ${a === 1 ? 'c’è 1 posto' : `ci sono ${a} posti`}.</span>`;
 }
 function clearFb(st) {
@@ -810,41 +889,83 @@ function clearFb(st) {
 function verify(st) {
   if (st.solved || ex.cur !== st.i) return;
   st.tries++;
+  if (st.check()) { finish(st); return; }
   const f = st.card.querySelector('.feedback');
-  if (st.check()) { finish(st, st.tries === 1); return; }
   f.className = 'feedback bad'; f.innerHTML = '✗ ' + st.why();
   shake(st.card);
-  score.streak = 0; renderScore();
+  if (mode === 'train') { score.streak = 0; renderScore(); }
 }
-function finish(st, firstTry) {
+const showPoints = () => mode === 'duel' || S.scores;
+function finish(st) {
   st.solved = true;
+  st.pts = st.shown ? 0 : st.tries === 1 ? 10 : st.tries === 2 ? 5 : 0;
+  ex.pts += st.pts;
+  if (duel) duel.pts[duel.cur] += st.pts;
+  else { score.pts += st.pts; if (st.tries === 1 && !st.shown) score.streak++; else score.streak = 0; }
   const f = st.card.querySelector('.feedback');
   st.card.classList.add('solved'); st.card.classList.remove('active');
-  if (st.shown) { f.className = 'feedback shown'; f.innerHTML = 'Ecco la soluzione. Rileggila con calma, poi continua.'; score.streak = 0; }
+  if (st.shown) { f.className = 'feedback shown'; f.innerHTML = 'Ecco la soluzione. Rileggila con calma, poi continua.' + (showPoints() ? ' (0 punti)' : ''); }
   else {
-    const pts = firstTry ? 10 : 5;
-    score.pts += pts; if (firstTry) score.streak++;
-    f.className = 'feedback ok'; f.innerHTML = `✓ Giusto! +${pts} punti` + (firstTry ? '' : ' (al secondo tentativo vale la metà)');
+    f.className = 'feedback ok';
+    f.innerHTML = '✓ Giusto!' + (showPoints() ? ` +${st.pts} punti` + (st.tries > 1 ? ` (al ${st.tries}° tentativo)` : '') : '');
   }
   st.card.querySelector('.step-status').textContent = st.shown ? 'soluzione' : '✓';
   st.card.querySelectorAll('.step-body button, .step-body input').forEach(b => { if (!b.classList.contains('opt')) b.disabled = true; });
   if (st.table) st.table.root.classList.add('locked');
-  renderScore();
-  if (st.i + 1 < ex.steps.length) activate(st.i + 1);
-  else {
+  renderScore(); renderDuelBar();
+  if (st.i + 1 < ex.steps.length) { activate(st.i + 1); return; }
+  exerciseDone();
+}
+function summaryHTML() {
+  const { u, v, kA, kDec, kSci } = ex, d = u.dim;
+  const parts = [`${decText(v, kA * d)}&nbsp;${unitHTML(kA, u)}`];
+  if (kDec !== kA) parts.push(`${decText(v, kDec * d)}&nbsp;${unitHTML(kDec, u)}`);
+  parts.push(sciHTML(v, kSci * d, unitHTML(kSci, u)));
+  return parts.join(' = ');
+}
+function exerciseDone() {
+  let end;
+  if (duel) {
+    const secs = (performance.now() - ex.t0) / 1000;
+    const me = duel.cur;
+    duel.time[me] += secs; duel.turns++;
+    const over = duel.turns >= duel.rounds * 2;
+    const next = duel.names[1 - me];
+    end = el('section', 'card done',
+      `<div class="done-msg"><b>${escapeHTML(duel.names[me])}</b>: ${ex.pts} punti in ${fmtTime(secs)}.<br><span class="muted">${summaryHTML()}</span></div>
+       <div class="done-btns"><button class="btn primary next">${over ? 'Vedi il risultato' : `Tocca a ${escapeHTML(next)}`}</button></div>`);
+    end.querySelector('.next').onclick = () => {
+      if (over) showDuelResult();
+      else { duel.cur = 1 - me; newExercise(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    };
+    renderDuelBar();
+  } else {
     score.done++; renderScore();
-    const end = el('section', 'card done',
-      `<div class="done-msg"><b>Esercizio completato!</b> ${decText(ex.v, ex.kA * ex.u.dim)}&nbsp;${unitHTML(ex.kA, ex.u)} = ${decText(ex.v, ex.kB * ex.u.dim)}&nbsp;${unitHTML(ex.kB, ex.u)} = ${sciHTML(ex.v, ex.kB * ex.u.dim, unitHTML(ex.kB, ex.u))}</div>
+    end = el('section', 'card done',
+      `<div class="done-msg"><b>Esercizio completato!</b> ${summaryHTML()}</div>
        <div class="done-btns"><button class="btn primary next">Prossimo esercizio</button><button class="btn ghost explore">Esplora in Conversioni</button></div>`);
-    $('steps').appendChild(end);
     end.querySelector('.next').onclick = () => { newExercise(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
     end.querySelector('.explore').onclick = () => {
-      cv.unit = ex.u; cv.v = ex.v; cv.k = ex.kA; cv.previewK = null;
+      if (unitAllowed(ex.u)) { cv.unit = ex.u; cv.v = ex.v; cv.k = ex.kA; cv.previewK = null; }
       $('exampleCaption').innerHTML = `Dall’esercizio: <b>${decText(ex.v, ex.kA * ex.u.dim)}&nbsp;${unitHTML(ex.kA, ex.u)}</b>`;
       showView('convert'); renderConvert(true);
     };
-    end.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
+  $('steps').appendChild(end);
+  end.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function showDuelResult() {
+  const [a, b] = duel.pts;
+  let w = a > b ? 0 : b > a ? 1 : duel.time[0] < duel.time[1] ? 0 : duel.time[1] < duel.time[0] ? 1 : -1;
+  const why = a !== b ? '' : w === -1 ? '' : ' (a parità di punti, è stato più veloce)';
+  $('givenCard').innerHTML = `<div class="result">
+      <div class="result-title">${w === -1 ? 'Pareggio perfetto!' : `Vince <b>${escapeHTML(duel.names[w])}</b>${why}`}</div>
+      <div class="result-grid">${[0, 1].map(i => `<div class="result-p${i === w ? ' win' : ''}"><div class="pl-name">${escapeHTML(duel.names[i])}</div><div class="pl-pts"><b>${duel.pts[i]}</b> punti</div><div class="pl-time">${fmtTime(duel.time[i])}</div></div>`).join('')}</div>
+      <div class="done-btns"><button class="btn primary again">Rivincita</button><button class="btn ghost setup">Nuova sfida</button></div></div>`;
+  $('steps').innerHTML = '';
+  $('givenCard').querySelector('.again').onclick = () => { const r = duel.rounds; duel = { ...duel, pts: [0, 0], time: [0, 0], turns: 0, cur: 0, rounds: r }; newExercise(); };
+  $('givenCard').querySelector('.setup').onclick = () => setMode('duel');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function activate(i) {
   ex.cur = i;
@@ -859,34 +980,71 @@ function renderScore() {
   $('scoreDone').textContent = score.done;
 }
 
+// ------------------------------------------------------------------ impostazioni (dialogo)
+function initSettings() {
+  const dlg = $('settingsDlg');
+  const boxes = { setDecPrefix: 'decPrefix', setSciPrefix: 'sciPrefix', setOdgPrefix: 'odgPrefix', setFundamental: 'fundamental', setScores: 'scores' };
+  let snapshot = '';
+  const sync = () => {
+    for (const [id, key] of Object.entries(boxes)) $(id).checked = !!S[key];
+    dlg.querySelectorAll('input[name="odgRule"]').forEach(r => { r.checked = r.value === S.odgRule; });
+  };
+  $('openSettings').addEventListener('click', () => {
+    sync(); snapshot = JSON.stringify({ ...S, scores: 0 });
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  });
+  for (const [id, key] of Object.entries(boxes)) $(id).addEventListener('change', e => { S[key] = e.target.checked; saveSettings(); applySettings(); });
+  dlg.querySelectorAll('input[name="odgRule"]').forEach(r => r.addEventListener('change', () => { S.odgRule = r.value; saveSettings(); applySettings(); }));
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); }); // clic fuori: chiude
+  dlg.addEventListener('close', () => {
+    // in allenamento un cambio di impostazioni rigenera l'esercizio; nella sfida vale dal turno successivo
+    if (ex && mode === 'train' && JSON.stringify({ ...S, scores: 0 }) !== snapshot) newExercise();
+  });
+}
+function applySettings() {
+  if (!unitAllowed(cv.unit)) {
+    const nu = cv.unit.q === 'massa' ? UNIT.get('kg') : UNIT.get('m');
+    cv.unit = nu; cv.previewK = null;
+  }
+  fillUnitSelect($('unitSelect'));
+  renderConvert(true);
+  updateScoreVisibility();
+}
+
 // ------------------------------------------------------------------ navigazione e strumenti
 function showView(name) {
   document.querySelectorAll('.tab').forEach(t => { const on = t.dataset.view === name; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
   $('view-convert').hidden = name !== 'convert';
   $('view-practice').hidden = name !== 'practice';
-  if (name === 'practice' && !ex) newExercise();
-  if (name === 'convert') convTable.layout();
-  else ex?.steps.forEach(s => s.table?.layout());
+  if (name === 'practice' && !ex && mode === 'train') newExercise();
+  relayoutAll();
   history.replaceState(null, '', name === 'practice' ? '#esercitati' : '#');
+}
+function relayoutAll() {
+  convTable?.layout();
+  ex?.steps.forEach(s => s.table?.layout());
+  ex?.givenTable?.layout();
 }
 let fontScale = parseFloat(localStorage.getItem('fontScale') || '1');
 function applyFont() {
-  document.documentElement.style.fontSize = (fontScale * 100) + '%';
+  document.documentElement.style.setProperty('--fs', fontScale);
   localStorage.setItem('fontScale', fontScale);
-  convTable?.layout();
-  ex?.steps.forEach(s => s.table?.layout());
+  relayoutAll();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   applyFont();
   initConvert();
   initPractice();
+  initSettings();
+  updateScoreVisibility();
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showView(t.dataset.view)));
   $('fontUp').onclick = () => { fontScale = Math.min(1.8, +(fontScale + 0.1).toFixed(2)); applyFont(); };
-  $('fontDown').onclick = () => { fontScale = Math.max(0.7, +(fontScale - 0.1).toFixed(2)); applyFont(); };
+  $('fontDown').onclick = () => { fontScale = Math.max(0.6, +(fontScale - 0.1).toFixed(2)); applyFont(); };
   $('fullscreen').onclick = () => {
     if (document.fullscreenElement) document.exitFullscreen?.();
     else document.documentElement.requestFullscreen?.().catch(() => {});
   };
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(relayoutAll, 80); });
   if (location.hash === '#esercitati') showView('practice');
 });
