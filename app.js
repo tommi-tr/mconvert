@@ -190,6 +190,31 @@ function odgOf(v, s) {
   return mantFloat(w) >= thr ? sciExp(w) + 1 : sciExp(w);
 }
 
+
+/** Nome a parole dell'ordine di grandezza 10^n (unità, decine, migliaia, decimi, millesimi…). */
+function ordName(n) {
+  if (n === 0) return 'unità';
+  if (n === 1) return 'decine';
+  if (n === 2) return 'centinaia';
+  if (n === -1) return 'decimi';
+  if (n === -2) return 'centesimi';
+  if (n > 0) {
+    const big = ['', 'migliaia', 'milioni', 'miliardi', 'migliaia di miliardi', 'milioni di miliardi', 'miliardi di miliardi'][Math.floor(n / 3)];
+    if (!big) return '';
+    return ['', 'decine di ', 'centinaia di '][n % 3] + big;
+  }
+  const m = -n, base = ['', 'millesimi', 'milionesimi', 'miliardesimi', 'bilionesimi', 'biliardesimi', 'trilionesimi'][Math.floor(m / 3)];
+  if (!base) return '';
+  return ['', 'deci', 'cento'][m % 3] + base;
+}
+/** 10ⁿ scritto anche per esteso: "10³ = 1000 (migliaia)". */
+function odgLongHTML(n, unitH) {
+  const one = { d: '1', e: n };
+  const dec = Math.abs(n) <= 9 ? `<span class="num">${decHTML(one, 0)}</span>&nbsp;${unitH}` : '';
+  const name = ordName(n);
+  return [dec, name ? `<span class="odg-name">${name}</span>` : ''].filter(Boolean).join(' · ');
+}
+
 // ------------------------------------------------------------------ unità
 const dimSup = d => d === 2 ? '²' : d === 3 ? '³' : '';
 const unitHTML = (k, u) => `<span class="u">${PFX.get(k)?.s ?? ''}${u.sym}${u.dim > 1 ? sup(u.dim) : ''}</span>`;
@@ -564,6 +589,7 @@ function renderConvert(unitChanged = false, editing = null) {
   $('sciUnit').innerHTML = unitHTML(kSci, u);
   const o = odgOf(v, kOdg * d);
   $('odgVal').innerHTML = o == null ? '—' : `<span class="pow">${powHTML(o)}</span>&nbsp;${unitHTML(kOdg, u)}`;
+  $('odgLong').innerHTML = o == null ? '' : '= ' + odgLongHTML(o, unitHTML(kOdg, u));
   const wo = shiftV(v, -kOdg * d);
   $('sciHint').innerHTML = isZero(w) ? '' :
     `coefficiente tra 1 e 10 · ▲▼ fanno crescere o calare la potenza` +
@@ -1106,7 +1132,7 @@ function mountStep(st) {
     const opts = [n - 1, n, n + 1, n + 2];
     c.innerHTML = stepHead(st, `Qual è l’ordine di grandezza in ${unitHTML(kOdg, u)}?`) +
       `<div class="step-body"><p class="instr">Se il coefficiente è minore di ${S.odgRule === '5' ? '5' : '√10 ≈ 3,16'} l’ordine di grandezza è 10<sup>n</sup>, altrimenti 10<sup>n+1</sup>.</p>
-       <div class="odg-opts">${opts.map(o => `<button class="btn opt" data-o="${o}"><span>${powHTML(o)}&nbsp;${unitHTML(kOdg, u)}</span></button>`).join('')}</div></div>` + stepFoot();
+       <div class="odg-opts">${opts.map(o => `<button class="btn opt" data-o="${o}"><span>${powHTML(o)}&nbsp;${unitHTML(kOdg, u)}<small class="opt-long">${ordName(o) || (Math.abs(o) <= 9 ? decText({ d: '1', e: o }, 0) : '')}</small></span></button>`).join('')}</div></div>` + stepFoot();
     c.querySelector('.check').hidden = true;
     st.choice = null;
     c.querySelectorAll('.opt').forEach(b => b.onclick = () => {

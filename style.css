@@ -376,3 +376,9 @@ button.box:hover { background: #e3edf9; }
 .big-in .type-in { font-size: 1.6rem; width: 14em; }
 #setRoundMode { margin-left: 1.9rem; }
 @media (max-width: 720px) { .sf-res { grid-template-columns: 1fr; } .brk { grid-template-columns: 1fr; } }
+
+.odg-long { font-size: 1.1rem; color: var(--muted); }
+.odg-long .num, .odg-long .u { color: var(--ink); font-weight: 700; }
+.odg-name { font-style: italic; }
+.opt-long { display: block; font-size: .8rem; font-weight: 400; color: var(--muted); text-align: center; }
+.btn.opt > span { display: block; }
